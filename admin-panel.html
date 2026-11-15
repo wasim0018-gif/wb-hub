@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>EduPrep Pro — Admin Control Panel (Easy Offline/JSON Sync)</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Hind Siliguri', 'Plus Jakarta Sans', sans-serif;
+      background: linear-gradient(135deg, #f8fafc 0%, #eef2ff 100%);
+      color: #0f172a;
+    }
+  </style>
+</head>
+<body class="p-4 sm:p-6">
+  <div class="max-w-7xl mx-auto space-y-6">
+    <!-- Top Header -->
+    <header class="bg-white border border-slate-200 rounded-3xl p-5 flex flex-wrap items-center justify-between gap-4 shadow-sm">
+      <div class="flex items-center gap-3.5">
+        <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-500 text-white font-extrabold flex items-center justify-center text-lg shadow-md">
+          EP
+        </div>
+        <div>
+          <h1 class="text-xl font-bold text-slate-900">EduPrep Pro — Admin Control Panel</h1>
+          <p class="text-xs text-slate-500">কোনো সার্ভার ছাড়াই পোস্ট করুন এবং JSON ফাইল এক্সপোর্ট করে অ্যাপে দিন</p>
+        </div>
+      </div>
+
+      <div class="flex flex-wrap items-center gap-2.5">
+        <button onclick="exportJsonFile()" class="px-4 py-2.5 rounded-xl bg-emerald-600 text-white text-xs font-extrabold shadow hover:bg-emerald-700 transition">
+          ⬇️ Export Data (eduprep_data.json)
+        </button>
+        <label class="cursor-pointer px-3.5 py-2.5 rounded-xl bg-amber-50 text-amber-800 border border-amber-200 text-xs font-bold hover:bg-amber-100 transition">
+          📂 Import Backup JSON
+          <input type="file" accept=".json" onchange="importJsonBackup(event)" class="hidden" />
+        </label>
+        <a href="student-app.html" target="_blank" class="px-4 py-2.5 rounded-xl bg-indigo-600 text-white text-xs font-bold shadow hover:bg-indigo-700 transition">
+          📱 Student App খুলুন →
+        </a>
+      </div>
+    </header>
+
+    <!-- 3 Main Control Modules -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <!-- Module 1: Bulk MCQ Importer (50 - 100+) -->
+      <section class="bg-white border border-slate-200 rounded-3xl p-5 shadow-sm space-y-3.5">
+        <div class="flex items-center justify-between">
+          <h2 class="text-base font-bold text-indigo-700">১. Bulk MCQ Importer (৫০–১০০+)</h2>
+          <span class="text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-indigo-50 text-indigo-700">Batch Post</span>
+        </div>
+        <p class="text-xs text-slate-500">একসঙ্গে ৫০ বা ১০০টি MCQ প্রশ্ন লোড বা পেস্ট করে সেভ করুন।</p>
+
+        <select id="mcqExam" class="w-full border border-slate-200 rounded-xl px-3 py-2.5 text-sm bg-slate-50"></select>
+        <select id="mcqSubject" class="w-full border border-slate-200 rounded-xl px-3 py-2.5 text-sm bg-slate-50">
+          <option value="বাংলা">বাংলা</option>
+          <option value="ইংরেজি">ইংরেজি</option>
+          <option value="গণিত">গণিত</option>
+          <option value="পরিবেশ বিদ্যা">পরিবেশ বিদ্যা</option>
+          <option value="সাধারণ জ্ঞান">সাধারণ জ্ঞান</option>
+          <option value="পেডাগোজি">পেডাগোজি</option>
+        </select>
+
+        <div class="grid grid-cols-2 gap-2">
+          <button onclick="loadSampleMcqs(50)" class="py-2 rounded-xl bg-indigo-50 text-indigo-700 text-xs font-bold hover:bg-indigo-100">
+            ✨ ৫০টি MCQ লোড
+          </button>
+          <button onclick="loadSampleMcqs(100)" class="py-2 rounded-xl bg-purple-50 text-purple-700 text-xs font-bold hover:bg-purple-100">
+            🚀 ১০০টি MCQ লোড
+          </button>
+        </div>
+
+        <textarea id="mcqBulkText" rows="6" placeholder="প্রশ্ন | অপশন১ | অপশন২ | অপশন৩ | অপশন৪ | সঠিক_ইনডেক্স(0-3) | ব্যাখ্যা" class="w-full border border-slate-200 rounded-xl p-3 text-xs font-mono bg-slate-50"></textarea>
+
+        <button onclick="publishBulkMcqs()" class="w-full py-3 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 text-white text-sm font-bold shadow">
+          MCQ গুলো সেভ করুন
+        </button>
+      </section>
+
+      <!-- Module 2: Scheduled Live Exam Creator (MCQ & Broad + Duration) -->
+      <section class="bg-white border border-slate-200 rounded-3xl p-5 shadow-sm space-y-3.5">
+        <div class="flex items-center justify-between">
+          <h2 class="text-base font-bold text-emerald-700">২. পরীক্ষা পরিচালনা (MCQ / Broad)</h2>
+          <span class="text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700">Live Test</span>
+        </div>
+        <p class="text-xs text-slate-500">কতদিন পরীক্ষা চলবে, ধরন (MCQ বা ব্রড) এবং সময় নির্ধারণ করুন।</p>
+
+        <input id="examName" type="text" placeholder="পরীক্ষার নাম (যেমন: WB TET Mega Mock)" class="w-full border border-slate-200 rounded-xl px-3 py-2.5 text-sm bg-slate-50" />
+        <select id="examTarget" class="w-full border border-slate-200 rounded-xl px-3 py-2.5 text-sm bg-slate-50"></select>
+
+        <div class="grid grid-cols-2 gap-2">
+          <div>
+            <label class="text-[11px] font-semibold text-slate-500">পরীক্ষার ধরন</label>
+            <select id="examType" class="w-full border border-slate-200 rounded-xl px-3 py-2 text-sm bg-slate-50">
+              <option value="MCQ">MCQ পরীক্ষা</option>
+              <option value="BROAD">ব্রড টাইপ পরীক্ষা</option>
+            </select>
+          </div>
+          <div>
+            <label class="text-[11px] font-semibold text-slate-500">কতদিন চলবে (দিন)</label>
+            <input id="examDays" type="number" value="7" min="1" max="90" class="w-full border border-slate-200 rounded-xl px-3 py-2 text-sm bg-slate-50" />
+          </div>
+        </div>
+
+        <div>
+          <label class="text-[11px] font-semibold text-slate-500">পরীক্ষার সময় (মিনিট)</label>
+          <input id="examMins" type="number" value="60" min="10" max="240" class="w-full border border-slate-200 rounded-xl px-3 py-2 text-sm bg-slate-50" />
+        </div>
+
+        <textarea id="examDesc" rows="3" placeholder="ব্রড টাইপ পরীক্ষার প্রশ্ন বা নির্দেশনা লিখুন..." class="w-full border border-slate-200 rounded-xl p-3 text-xs bg-slate-50"></textarea>
+
+        <button onclick="publishScheduledExam()" class="w-full py-3 rounded-xl bg-emerald-600 text-white text-sm font-bold shadow">
+          পরীক্ষা সেভ ও চালু করুন
+        </button>
+      </section>
+
+      <!-- Module 3: Syllabus / PDF / Notes / বড় প্রশ্ন / Interview -->
+      <section class="bg-white border border-slate-200 rounded-3xl p-5 shadow-sm space-y-3.5">
+        <div class="flex items-center justify-between">
+          <h2 class="text-base font-bold text-slate-900">৩. Study Material Composer</h2>
+          <span class="text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-700">All Sections</span>
+        </div>
+        <p class="text-xs text-slate-500">Syllabus, PDF, Notes, বড় প্রশ্ন এবং Interview যোগ করুন।</p>
+
+        <select id="cntExam" class="w-full border border-slate-200 rounded-xl px-3 py-2.5 text-sm bg-slate-50"></select>
+        <input id="cntSubject" type="text" value="বাংলা" placeholder="বিষয় (Subject)" class="w-full border border-slate-200 rounded-xl px-3 py-2.5 text-sm bg-slate-50" />
+
+        <select id="cntType" class="w-full border border-slate-200 rounded-xl px-3 py-2.5 text-sm bg-slate-50">
+          <option value="Syllabus">Syllabus</option>
+          <option value="PDF">PDF</option>
+          <option value="Notes">Notes</option>
+          <option value="বড় প্রশ্ন">বড় প্রশ্ন</option>
+          <option value="Interview">Interview</option>
+        </select>
+
+        <input id="cntTitle" type="text" placeholder="শিরোনাম লিখুন" class="w-full border border-slate-200 rounded-xl px-3 py-2.5 text-sm bg-slate-50" />
+        <textarea id="cntBody" rows="4" placeholder="বিস্তারিত লেখা বা PDF লিংক..." class="w-full border border-slate-200 rounded-xl p-3 text-xs bg-slate-50"></textarea>
+
+        <button onclick="publishStudyContent()" class="w-full py-3 rounded-xl bg-slate-900 text-white text-sm font-bold shadow">
+          কনটেন্ট সেভ করুন
+        </button>
+      </section>
+    </div>
+
+    <!-- Live Stats & Student Broad Answer Submissions -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div id="adminStatsBox" class="bg-white border border-slate-200 rounded-3xl p-5 shadow-sm"></div>
+      <div id="adminSubmissionsBox" class="bg-white border border-slate-200 rounded-3xl p-5 shadow-sm"></div>
+    </div>
+  </div>
+
+  <script>
+    const EXAMS = [
+      { id: 'wbssc', title: 'WBSSC' },
+      { id: 'wb_tet', title: 'WB TET' },
+      { id: 'upper_primary_tet', title: 'Upper Primary TET' },
+      { id: 'ctet', title: 'CTET' },
+      { id: 'miscellaneous', title: 'Miscellaneous Exam' },
+      { id: 'clerkship', title: 'Clerkship Exam' },
+      { id: 'wbssc_group_cd', title: 'WBSSC Group C & D' },
+      { id: 'police_exam', title: 'Police Exam' }
+    ];
+
+    const STORE_KEY = 'EDUPREP_PREMIUM_SYNC_V3';
+
+    function getInitialData() {
+      return {
+        updatedAt: Date.now(),
+        mcqs: [
+          {
+            id: 'm1',
+            examId: 'wb_tet',
+            subject: 'বাংলা',
+            question: '‘অহংকার’ শব্দের সঠিক সন্ধি বিচ্ছেদ কোনটি?',
+            options: ['অহং + কার', 'অহঃ + কার', 'অহ + কার', 'অহম + কার'],
+            correctIndex: 1,
+            explanation: 'অহঃ + কার = অহংকার (বিসর্গ সন্ধি)।'
+          },
+          {
+            id: 'm2',
+            examId: 'wb_tet',
+            subject: 'বাংলা',
+            question: 'শিশুদের ভাষা শিক্ষার ক্ষেত্রে কোন দক্ষতাটি সবার আগে অর্জিত হয়?',
+            options: ['পঠন', 'লিখন', 'শ্রবণ', 'কথন'],
+            correctIndex: 2,
+            explanation: 'ভাষা অর্জনের স্বাভাবিক ক্রম হলো: শ্রবণ → কথন → পঠন → লিখন।'
+          }
+        ],
+        scheduledExams: [
+          {
+            id: 'ex_101',
+            title: 'WB TET Mega Mock Test - 01',
+            examId: 'wb_tet',
+            type: 'MCQ',
+            daysDuration: 7,
+            durationMinutes: 60,
+            instructions: 'প্রতিটি প্রশ্নের মান ১ নম্বর। নেগেটিভ মার্কিং নেই।'
+          },
+          {
+            id: 'ex_102',
+            title: 'WBSSC Descriptive Essay & Pedagogy Test',
+            examId: 'wbssc',
+            type: 'BROAD',
+            daysDuration: 5,
+            durationMinutes: 45,
+            instructions: 'আধুনিক শ্রেণিকক্ষে ডিজিটাল ও অংশগ্রহণমূলক শিক্ষণ পদ্ধতির গুরুত্ব ২০০ শব্দের মধ্যে আলোচনা করো।'
+          }
+        ],
+        contents: [
+          {
+            id: 'c1',
+            examId: 'wb_tet',
+            subject: 'বাংলা',
+            type: 'Syllabus',
+            title: 'WB TET বাংলা পূর্ণাঙ্গ সিলেবাস',
+            body: '১. বোধ পরীক্ষণ (গদ্য ও পদ্য)\n২. বাংলা ব্যাকরণ (সন্ধি, সমাস, কারক, পদ পরিবর্তন)\n৩. ভাষা শিক্ষণ ও পেডাগোজি'
+          },
+          {
+            id: 'c2',
+            examId: 'wb_tet',
+            subject: 'বাংলা',
+            type: 'PDF',
+            title: 'WB TET বাংলা ব্যাকরণ মাস্টার পিডিএফ (2.4 MB)',
+            body: 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf'
+          },
+          {
+            id: 'c3',
+            examId: 'wb_tet',
+            subject: 'বাংলা',
+            type: 'Notes',
+            title: 'বিসর্গ সন্ধির সংক্ষিপ্ত নোটস',
+            body: 'বিসর্গের পূর্বে অ-কার এবং পরে বর্গের তৃতীয়, চতুর্থ, পঞ্চম বর্ণ অথবা য, র, ল, ব, হ থাকলে বিসর্গ ও-কারে পরিণত হয়। যেমন: মনঃ + হর = মনোহর।'
+          },
+          {
+            id: 'c4',
+            examId: 'wb_tet',
+            subject: 'বাংলা',
+            type: 'বড় প্রশ্ন',
+            title: 'মাতৃভাষার মাধ্যমে শিক্ষাদানের প্রধান সুবিধাগুলি কী কী?',
+            body: '১. চিন্তার স্বচ্ছতা ও দ্রুত ধারণা গঠন\n২. শিক্ষার্থীদের আত্মবিশ্বাস ও স্বতঃস্ফূর্ত অংশগ্রহণ\n৩. সৃজনশীল প্রকাশক্ষমতার বিকাশ'
+          },
+          {
+            id: 'c5',
+            examId: 'wb_tet',
+            subject: 'বাংলা',
+            type: 'Interview',
+            title: 'প্রশ্ন: আপনি কেন প্রাথমিক শিক্ষক হতে চান?',
+            body: 'আদর্শ উত্তর: শিশুদের শেখার ভিত্তি তৈরি হয় প্রাথমিক স্তরে। তাদের কৌতূহলকে উৎসাহিত করে আনন্দময় পরিবেশে সঠিক দিশা দেওয়াই আমার প্রধান লক্ষ্য।'
+          }
+        ],
+        submissions: []
+      };
+    }
+
+    function readStore() {
+      const raw = localStorage.getItem(STORE_KEY);
+      if (raw) return JSON.parse(raw);
+      const init = getInitialData();
+      localStorage.setItem(STORE_KEY, JSON.stringify(init));
+      return init;
+    }
+
+    function writeStore(store) {
+      store.updatedAt = Date.now();
+      localStorage.setItem(STORE_KEY, JSON.stringify(store));
+      renderAdmin();
+    }
+
+    function exportJsonFile() {
+      const store = readStore();
+      const blob = new Blob([JSON.stringify(store, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'eduprep_data.json';
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+
+    function importJsonBackup(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        try {
+          const parsed = JSON.parse(e.target.result);
+          if (parsed && Array.isArray(parsed.mcqs)) {
+            writeStore(parsed);
+            alert('✅ ব্যাকআপ ফাইল সফলভাবে লোড হয়েছে!');
+          } else {
+            alert('❌ সঠিক EduPrep JSON ফাইল নয়।');
+          }
+        } catch {
+          alert('❌ ফাইল পড়তে সমস্যা হয়েছে।');
+        }
+      };
+      reader.readAsText(file);
+    }
+
+    function loadSampleMcqs(count) {
+      const lines = [];
+      for (let i = 1; i <= count; i++) {
+        lines.push(`প্র্যাকটিস প্রশ্ন ${i}: গঠনামূলক মূল্যায়নের (Formative Evaluation) প্রধান লক্ষ্য কী? | শুধু নম্বর দেওয়া | শিখন ঘাটতি চিহ্নিত ও সংশোধন করা | বার্ষিক ফলাফল তৈরি | সিলেবাস শেষ করা | 1 | গঠনামূলক মূল্যায়নের মাধ্যমে পাঠ চলাকালীন শিক্ষার্থীর অগ্রগতি যাচাই করা হয়।`);
+      }
+      document.getElementById('mcqBulkText').value = lines.join('\n');
+    }
+
+    function publishBulkMcqs() {
+      const store = readStore();
+      const examId = document.getElementById('mcqExam').value;
+      const subject = document.getElementById('mcqSubject').value;
+      const rows = document.getElementById('mcqBulkText').value.split('\n').map(r => r.trim()).filter(Boolean);
+
+      if (!rows.length) return alert('আগে ৫০ বা ১০০টি MCQ লোড বা পেস্ট করুন।');
+
+      let count = 0;
+      rows.forEach(row => {
+        const p = row.split('|').map(x => x.trim());
+        if (p.length >= 6) {
+          store.mcqs.push({
+            id: 'mcq_' + Date.now() + '_' + Math.random().toString(36).slice(2, 6),
+            examId,
+            subject,
+            question: p[0],
+            options: [p[1], p[2], p[3], p[4]],
+            correctIndex: Number(p[5]) || 0,
+            explanation: p[6] || 'সঠিক উত্তর সংরক্ষিত।'
+          });
+          count++;
+        }
+      });
+
+      writeStore(store);
+      alert(`${count}টি MCQ সেভ হয়েছে! এখন Export Data বাটনে ক্লিক করে ফাইল নামিয়ে নিতে পারেন।`);
+    }
+
+    function publishScheduledExam() {
+      const store = readStore();
+      store.scheduledExams.unshift({
+        id: 'ex_' + Date.now(),
+        title: document.getElementById('examName').value.trim() || 'Live Mock Test',
+        examId: document.getElementById('examTarget').value,
+        type: document.getElementById('examType').value,
+        daysDuration: Number(document.getElementById('examDays').value) || 7,
+        durationMinutes: Number(document.getElementById('examMins').value) || 60,
+        instructions: document.getElementById('examDesc').value.trim() || 'নির্ধারিত সময়ের মধ্যে পরীক্ষা সম্পন্ন করুন।'
+      });
+      writeStore(store);
+      alert('লাইভ পরীক্ষা সেভ ও চালু হয়েছে!');
+    }
+
+    function publishStudyContent() {
+      const store = readStore();
+      store.contents.unshift({
+        id: 'cnt_' + Date.now(),
+        examId: document.getElementById('cntExam').value,
+        subject: document.getElementById('cntSubject').value.trim() || 'বাংলা',
+        type: document.getElementById('cntType').value,
+        title: document.getElementById('cntTitle').value.trim() || 'নতুন স্টাডি কনটেন্ট',
+        body: document.getElementById('cntBody').value.trim() || 'কনটেন্ট যুক্ত হয়েছে।'
+      });
+      writeStore(store);
+      alert('কনটেন্ট সেভ হয়েছে!');
+    }
+
+    function renderAdmin() {
+      const opts = EXAMS.map(e => `<option value="${e.id}">${e.title}</option>`).join('');
+      document.getElementById('mcqExam').innerHTML = opts;
+      document.getElementById('examTarget').innerHTML = opts;
+      document.getElementById('cntExam').innerHTML = opts;
+
+      const store = readStore();
+      document.getElementById('adminStatsBox').innerHTML = `
+        <h3 class="text-base font-bold text-slate-900 mb-3">সেভ করা ডেটা স্ট্যাটাস</h3>
+        <div class="grid grid-cols-3 gap-3 text-center">
+          <div class="p-4 rounded-2xl bg-indigo-50">
+            <p class="text-2xl font-extrabold text-indigo-700">${store.mcqs.length}</p>
+            <p class="text-xs text-slate-600 mt-1">মোট MCQ</p>
+          </div>
+          <div class="p-4 rounded-2xl bg-emerald-50">
+            <p class="text-2xl font-extrabold text-emerald-700">${store.scheduledExams.length}</p>
+            <p class="text-xs text-slate-600 mt-1">লাইভ পরীক্ষা</p>
+          </div>
+          <div class="p-4 rounded-2xl bg-amber-50">
+            <p class="text-2xl font-extrabold text-amber-700">${store.contents.length}</p>
+            <p class="text-xs text-slate-600 mt-1">Study Items</p>
+          </div>
+        </div>
+      `;
+
+      document.getElementById('adminSubmissionsBox').innerHTML = `
+        <h3 class="text-base font-bold text-slate-900 mb-3">ছাত্রছাত্রীদের ব্রড পরীক্ষার উত্তর (${store.submissions.length})</h3>
+        ${store.submissions.length ? store.submissions.map(s => `
+          <div class="p-3.5 rounded-2xl bg-slate-50 border border-slate-200 mb-2.5 text-xs">
+            <div class="flex justify-between font-bold text-slate-900">
+              <span>${s.examTitle}</span>
+              <span class="text-indigo-600">${s.studentName}</span>
+            </div>
+            <p class="text-slate-600 mt-1.5 whitespace-pre-line">${s.answer}</p>
+          </div>
+        `).join('') : '<p class="text-xs text-slate-400">ছাত্রছাত্রীরা ব্রড পরীক্ষার উত্তর জমা দিলে এখানে দেখাবে।</p>'}
+      `;
+    }
+
+    window.addEventListener('storage', renderAdmin);
+    renderAdmin();
+  </script>
+</body>
+</html>
