@@ -1,410 +1,965 @@
 <!DOCTYPE html>
-<html lang="bn">
+<html lang="bn" data-color="indigo">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>EduPrep Pro — Admin Control Panel (Easy Offline/JSON Sync)</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet">
-  <style>
-    body {
-      font-family: 'Hind Siliguri', 'Plus Jakarta Sans', sans-serif;
-      background: linear-gradient(135deg, #f8fafc 0%, #eef2ff 100%);
-      color: #0f172a;
-    }
-  </style>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="theme-color" content="#6366f1" />
+<title>Admin — West Bengal: Exam & Mock Hub</title>
+<link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&family=Inter:wght@600;700;800;900&display=swap" rel="stylesheet">
+<style>
+:root{--brand:#6366f1;--brand-2:#8b5cf6;--brand-3:#ec4899;--brand-rgb:99,102,241;--success:#10b981;--danger:#ef4444;--warning:#f59e0b;--bg:#f8fafc;--card:#fff;--text:#0f172a;--muted:#64748b;--border:rgba(148,163,184,.15)}
+[data-color="indigo"]{--brand:#6366f1;--brand-2:#8b5cf6;--brand-rgb:99,102,241}
+[data-color="emerald"]{--brand:#10b981;--brand-2:#059669;--brand-rgb:16,185,129}
+[data-color="rose"]{--brand:#ec4899;--brand-2:#db2777;--brand-rgb:236,72,153}
+[data-color="amber"]{--brand:#f59e0b;--brand-2:#f97316;--brand-rgb:245,158,11}
+[data-color="cyan"]{--brand:#06b6d4;--brand-2:#0891b2;--brand-rgb:6,182,212}
+[data-color="violet"]{--brand:#8b5cf6;--brand-2:#7c3aed;--brand-rgb:139,92,246}
+[data-color="slate"]{--brand:#64748b;--brand-2:#475569;--brand-rgb:100,116,139}
+[data-theme="dark"]{--bg:#0b1220;--card:#131c31;--text:#e2e8f0;--muted:#94a3b8;--border:rgba(100,116,139,.25)}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0}
+body{min-height:100dvh;background:var(--bg);color:var(--text);font-family:'Hind Siliguri','Inter',sans-serif;padding:env(safe-area-inset-top) 0 env(safe-area-inset-bottom);-webkit-font-smoothing:antialiased}
+h1{font-size:24px;font-weight:800;margin:0}
+h2{font-size:20px;font-weight:700;margin:0 0 12px}
+h3{font-size:16px;font-weight:700;margin:0 0 8px}
+p{margin:0;line-height:1.5}
+.muted{color:var(--muted);font-size:13px}
+.admin-wrap{max-width:1400px;margin:0 auto;padding:20px}
+.admin-header{background:var(--card);border-radius:20px;padding:18px 22px;display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between;border:1px solid var(--border);box-shadow:0 4px 24px -8px rgba(15,23,42,.08);margin-bottom:20px}
+.admin-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:20px}
+.module{background:var(--card);border-radius:20px;padding:20px;border:1px solid var(--border);box-shadow:0 4px 24px -8px rgba(15,23,42,.08)}
+.module h2{font-size:15px;margin:0 0 12px}
+.module .btn{width:100%;margin-top:8px}
+.btn-row{display:flex;gap:8px;margin-top:8px}
+.btn-row .btn{flex:1;width:auto;margin-top:0}
+.edit-mode-banner{background:linear-gradient(135deg,rgba(245,158,11,.15),rgba(239,68,68,.1));border:1px solid rgba(245,158,11,.4);border-radius:12px;padding:10px 14px;margin-bottom:10px;font-size:12px;font-weight:800;color:#b45309;display:flex;align-items:center;gap:8px}
+.drop-zone{border:2px dashed var(--border);border-radius:14px;padding:20px;text-align:center;cursor:pointer;margin-bottom:10px}
+.grad-swatch{display:inline-block;width:36px;height:36px;border-radius:10px;border:2px solid transparent;cursor:pointer;margin:3px}
+.grad-swatch.active{border-color:var(--text);box-shadow:0 0 0 2px var(--brand)}
+.cat-item{display:flex;align-items:center;gap:8px;padding:10px;border-radius:12px;margin-bottom:8px;background:rgba(148,163,184,.08);border:1px solid var(--border)}
+.cat-icon{width:40px;height:40px;border-radius:10px;display:grid;place-items:center;font-size:20px;flex-shrink:0;color:white}
+.subj-badge{display:inline-block;padding:2px 8px;border-radius:99px;background:rgba(var(--brand-rgb),.12);color:var(--brand);font-size:10px;font-weight:800;margin:2px}
+.btn{border:none;border-radius:14px;padding:14px 20px;font-weight:700;font-size:14px;cursor:pointer;font-family:inherit;transition:opacity .15s}
+.btn:active{opacity:.85}
+.btn-primary{background:linear-gradient(135deg,var(--brand),var(--brand-2));color:white}
+.btn-success{background:var(--success);color:white}
+.btn-danger{background:var(--danger);color:white}
+.btn-warning{background:var(--warning);color:white}
+.btn-ghost{background:transparent;border:1px solid var(--border);color:var(--text)}
+.btn-sm{padding:8px 14px;font-size:12px;border-radius:10px}
+.btn-icon{padding:6px 10px;font-size:13px;border-radius:8px}
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+input,textarea,select{width:100%;padding:12px 14px;border-radius:12px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-size:14px;font-family:inherit}
+input:focus,textarea:focus,select:focus{outline:none;border-color:var(--brand)}
+textarea{resize:vertical;min-height:80px}
+label{font-size:11px;font-weight:700;color:var(--muted);display:block;margin:10px 0 4px}
+.toast{position:fixed;top:20px;left:50%;transform:translateX(-50%) translateY(-20px);background:#0f172a;color:white;padding:12px 22px;border-radius:12px;font-size:13px;font-weight:600;z-index:200;opacity:0;transition:all .3s;pointer-events:none;max-width:90vw;text-align:center}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.toast.success{background:var(--success)}
+.toast.error{background:var(--danger)}
+.login-screen{position:fixed;inset:0;background:linear-gradient(135deg,var(--bg),var(--card));display:flex;align-items:center;justify-content:center;z-index:9999;padding:20px}
+.login-card{background:var(--card);border-radius:20px;padding:32px 28px;max-width:400px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,.15);border:1px solid var(--border)}
+.login-logo{width:70px;height:70px;border-radius:20px;background:linear-gradient(135deg,var(--brand),var(--brand-3));display:grid;place-items:center;color:white;font-size:28px;margin:0 auto 16px}
+</style>
 </head>
-<body class="p-4 sm:p-6">
-  <div class="max-w-7xl mx-auto space-y-6">
-    <!-- Top Header -->
-    <header class="bg-white border border-slate-200 rounded-3xl p-5 flex flex-wrap items-center justify-between gap-4 shadow-sm">
-      <div class="flex items-center gap-3.5">
-        <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-500 text-white font-extrabold flex items-center justify-center text-lg shadow-md">
-          EP
-        </div>
-        <div>
-          <h1 class="text-xl font-bold text-slate-900">EduPrep Pro — Admin Control Panel</h1>
-          <p class="text-xs text-slate-500">কোনো সার্ভার ছাড়াই পোস্ট করুন এবং JSON ফাইল এক্সপোর্ট করে অ্যাপে দিন</p>
-        </div>
-      </div>
+<body>
 
-      <div class="flex flex-wrap items-center gap-2.5">
-        <button onclick="exportJsonFile()" class="px-4 py-2.5 rounded-xl bg-emerald-600 text-white text-xs font-extrabold shadow hover:bg-emerald-700 transition">
-          ⬇️ Export Data (eduprep_data.json)
-        </button>
-        <label class="cursor-pointer px-3.5 py-2.5 rounded-xl bg-amber-50 text-amber-800 border border-amber-200 text-xs font-bold hover:bg-amber-100 transition">
-          📂 Import Backup JSON
-          <input type="file" accept=".json" onchange="importJsonBackup(event)" class="hidden" />
-        </label>
-        <a href="student-app.html" target="_blank" class="px-4 py-2.5 rounded-xl bg-indigo-600 text-white text-xs font-bold shadow hover:bg-indigo-700 transition">
-          📱 Student App খুলুন →
-        </a>
-      </div>
-    </header>
-
-    <!-- 3 Main Control Modules -->
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-      <!-- Module 1: Bulk MCQ Importer (50 - 100+) -->
-      <section class="bg-white border border-slate-200 rounded-3xl p-5 shadow-sm space-y-3.5">
-        <div class="flex items-center justify-between">
-          <h2 class="text-base font-bold text-indigo-700">১. Bulk MCQ Importer (৫০–১০০+)</h2>
-          <span class="text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-indigo-50 text-indigo-700">Batch Post</span>
-        </div>
-        <p class="text-xs text-slate-500">একসঙ্গে ৫০ বা ১০০টি MCQ প্রশ্ন লোড বা পেস্ট করে সেভ করুন।</p>
-
-        <select id="mcqExam" class="w-full border border-slate-200 rounded-xl px-3 py-2.5 text-sm bg-slate-50"></select>
-        <select id="mcqSubject" class="w-full border border-slate-200 rounded-xl px-3 py-2.5 text-sm bg-slate-50">
-          <option value="বাংলা">বাংলা</option>
-          <option value="ইংরেজি">ইংরেজি</option>
-          <option value="গণিত">গণিত</option>
-          <option value="পরিবেশ বিদ্যা">পরিবেশ বিদ্যা</option>
-          <option value="সাধারণ জ্ঞান">সাধারণ জ্ঞান</option>
-          <option value="পেডাগোজি">পেডাগোজি</option>
-        </select>
-
-        <div class="grid grid-cols-2 gap-2">
-          <button onclick="loadSampleMcqs(50)" class="py-2 rounded-xl bg-indigo-50 text-indigo-700 text-xs font-bold hover:bg-indigo-100">
-            ✨ ৫০টি MCQ লোড
-          </button>
-          <button onclick="loadSampleMcqs(100)" class="py-2 rounded-xl bg-purple-50 text-purple-700 text-xs font-bold hover:bg-purple-100">
-            🚀 ১০০টি MCQ লোড
-          </button>
-        </div>
-
-        <textarea id="mcqBulkText" rows="6" placeholder="প্রশ্ন | অপশন১ | অপশন২ | অপশন৩ | অপশন৪ | সঠিক_ইনডেক্স(0-3) | ব্যাখ্যা" class="w-full border border-slate-200 rounded-xl p-3 text-xs font-mono bg-slate-50"></textarea>
-
-        <button onclick="publishBulkMcqs()" class="w-full py-3 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 text-white text-sm font-bold shadow">
-          MCQ গুলো সেভ করুন
-        </button>
-      </section>
-
-      <!-- Module 2: Scheduled Live Exam Creator (MCQ & Broad + Duration) -->
-      <section class="bg-white border border-slate-200 rounded-3xl p-5 shadow-sm space-y-3.5">
-        <div class="flex items-center justify-between">
-          <h2 class="text-base font-bold text-emerald-700">২. পরীক্ষা পরিচালনা (MCQ / Broad)</h2>
-          <span class="text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700">Live Test</span>
-        </div>
-        <p class="text-xs text-slate-500">কতদিন পরীক্ষা চলবে, ধরন (MCQ বা ব্রড) এবং সময় নির্ধারণ করুন।</p>
-
-        <input id="examName" type="text" placeholder="পরীক্ষার নাম (যেমন: WB TET Mega Mock)" class="w-full border border-slate-200 rounded-xl px-3 py-2.5 text-sm bg-slate-50" />
-        <select id="examTarget" class="w-full border border-slate-200 rounded-xl px-3 py-2.5 text-sm bg-slate-50"></select>
-
-        <div class="grid grid-cols-2 gap-2">
-          <div>
-            <label class="text-[11px] font-semibold text-slate-500">পরীক্ষার ধরন</label>
-            <select id="examType" class="w-full border border-slate-200 rounded-xl px-3 py-2 text-sm bg-slate-50">
-              <option value="MCQ">MCQ পরীক্ষা</option>
-              <option value="BROAD">ব্রড টাইপ পরীক্ষা</option>
-            </select>
-          </div>
-          <div>
-            <label class="text-[11px] font-semibold text-slate-500">কতদিন চলবে (দিন)</label>
-            <input id="examDays" type="number" value="7" min="1" max="90" class="w-full border border-slate-200 rounded-xl px-3 py-2 text-sm bg-slate-50" />
-          </div>
-        </div>
-
-        <div>
-          <label class="text-[11px] font-semibold text-slate-500">পরীক্ষার সময় (মিনিট)</label>
-          <input id="examMins" type="number" value="60" min="10" max="240" class="w-full border border-slate-200 rounded-xl px-3 py-2 text-sm bg-slate-50" />
-        </div>
-
-        <textarea id="examDesc" rows="3" placeholder="ব্রড টাইপ পরীক্ষার প্রশ্ন বা নির্দেশনা লিখুন..." class="w-full border border-slate-200 rounded-xl p-3 text-xs bg-slate-50"></textarea>
-
-        <button onclick="publishScheduledExam()" class="w-full py-3 rounded-xl bg-emerald-600 text-white text-sm font-bold shadow">
-          পরীক্ষা সেভ ও চালু করুন
-        </button>
-      </section>
-
-      <!-- Module 3: Syllabus / PDF / Notes / বড় প্রশ্ন / Interview -->
-      <section class="bg-white border border-slate-200 rounded-3xl p-5 shadow-sm space-y-3.5">
-        <div class="flex items-center justify-between">
-          <h2 class="text-base font-bold text-slate-900">৩. Study Material Composer</h2>
-          <span class="text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-700">All Sections</span>
-        </div>
-        <p class="text-xs text-slate-500">Syllabus, PDF, Notes, বড় প্রশ্ন এবং Interview যোগ করুন।</p>
-
-        <select id="cntExam" class="w-full border border-slate-200 rounded-xl px-3 py-2.5 text-sm bg-slate-50"></select>
-        <input id="cntSubject" type="text" value="বাংলা" placeholder="বিষয় (Subject)" class="w-full border border-slate-200 rounded-xl px-3 py-2.5 text-sm bg-slate-50" />
-
-        <select id="cntType" class="w-full border border-slate-200 rounded-xl px-3 py-2.5 text-sm bg-slate-50">
-          <option value="Syllabus">Syllabus</option>
-          <option value="PDF">PDF</option>
-          <option value="Notes">Notes</option>
-          <option value="বড় প্রশ্ন">বড় প্রশ্ন</option>
-          <option value="Interview">Interview</option>
-        </select>
-
-        <input id="cntTitle" type="text" placeholder="শিরোনাম লিখুন" class="w-full border border-slate-200 rounded-xl px-3 py-2.5 text-sm bg-slate-50" />
-        <textarea id="cntBody" rows="4" placeholder="বিস্তারিত লেখা বা PDF লিংক..." class="w-full border border-slate-200 rounded-xl p-3 text-xs bg-slate-50"></textarea>
-
-        <button onclick="publishStudyContent()" class="w-full py-3 rounded-xl bg-slate-900 text-white text-sm font-bold shadow">
-          কনটেন্ট সেভ করুন
-        </button>
-      </section>
-    </div>
-
-    <!-- Live Stats & Student Broad Answer Submissions -->
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-      <div id="adminStatsBox" class="bg-white border border-slate-200 rounded-3xl p-5 shadow-sm"></div>
-      <div id="adminSubmissionsBox" class="bg-white border border-slate-200 rounded-3xl p-5 shadow-sm"></div>
-    </div>
+<!-- LOGIN SCREEN -->
+<div id="loginScreen" class="login-screen">
+  <div class="login-card">
+    <div class="login-logo">🔐</div>
+    <h2 style="text-align:center;font-size:22px;margin-bottom:4px">Admin Login</h2>
+    <p class="muted" style="text-align:center;font-size:12px;margin-bottom:24px">শুধুমাত্র অনুমোদিত অ্যাডমিন প্রবেশ করতে পারবেন</p>
+    <label>ইমেইল</label>
+    <input id="loginEmail" type="email" placeholder="your@email.com" autocomplete="email" />
+    <label>পাসওয়ার্ড</label>
+    <input id="loginPassword" type="password" placeholder="••••••••" autocomplete="current-password" onkeydown="if(event.key==='Enter')adminLogin()" />
+    <div id="loginErr" style="color:var(--danger);font-size:12px;font-weight:700;text-align:center;min-height:18px;margin:12px 0"></div>
+    <button class="btn btn-primary" style="width:100%" onclick="adminLogin()">🔓 Login</button>
+    <p class="muted" style="text-align:center;font-size:11px;margin-top:16px">Firebase অ্যাকাউন্ট দিয়ে লগইন করুন</p>
   </div>
+</div>
 
-  <script>
-    const EXAMS = [
-      { id: 'wbssc', title: 'WBSSC' },
-      { id: 'wb_tet', title: 'WB TET' },
-      { id: 'upper_primary_tet', title: 'Upper Primary TET' },
-      { id: 'ctet', title: 'CTET' },
-      { id: 'miscellaneous', title: 'Miscellaneous Exam' },
-      { id: 'clerkship', title: 'Clerkship Exam' },
-      { id: 'wbssc_group_cd', title: 'WBSSC Group C & D' },
-      { id: 'police_exam', title: 'Police Exam' }
-    ];
+<!-- ADMIN PANEL -->
+<div id="adminApp" class="admin-wrap" style="display:none">
+  <header class="admin-header">
+    <div style="display:flex;align-items:center;gap:12px">
+      <div style="width:44px;height:44px;border-radius:12px;background:linear-gradient(135deg,var(--brand),var(--brand-3));color:white;font-weight:800;display:grid;place-items:center;font-size:13px">WB</div>
+      <div><h1 style="font-size:18px">Admin Control Panel</h1><p class="muted" id="adminEmailDisplay">West Bengal: Exam & Mock Hub</p></div>
+    </div>
+    <div style="display:flex;flex-wrap:wrap;gap:8px">
+      <button class="btn btn-sm" onclick="pushToCloud()" style="background:linear-gradient(135deg,#06b6d4,#0891b2);color:white">☁️ Push to Cloud</button>
+      <button class="btn btn-success btn-sm" onclick="exportJson()">⬇️ Export JSON</button>
+      <button class="btn btn-sm btn-ghost" onclick="exportCsv()">📊 CSV</button>
+      <button class="btn btn-sm" onclick="pullFromCloud()" style="background:linear-gradient(135deg,#8b5cf6,#7c3aed);color:white">🔄 Pull from Cloud</button>
+      <button class="btn btn-sm btn-danger" onclick="adminLogout()">🚪 Logout</button>
+    </div>
+  </header>
+  <div class="admin-grid">
+    <!-- MODULE 1: BULK MCQ -->
+    <section class="module">
+      <h2>১. Bulk MCQ Importer</h2>
+      <label>পরীক্ষা</label>
+      <select id="mcqExam" onchange="updateMcqSubjects()"></select>
+      <label>বিষয়</label>
+      <select id="mcqSubject"></select>
+      <div class="grid-2" style="margin-top:10px">
+        <button class="btn btn-sm btn-ghost" onclick="loadSample(50)">✨ ৫০টি</button>
+        <button class="btn btn-sm btn-ghost" onclick="loadSample(100)">🚀 ১০০টি</button>
+      </div>
+      <label>MCQ (প্রশ্ন | A | B | C | D | সঠিক(0-3) | ব্যাখ্যা)</label>
+      <textarea id="mcqText" rows="8" style="font-family:monospace;font-size:11px"></textarea>
+      <button class="btn btn-primary" onclick="saveMcqs()">💾 সেভ করুন</button>
+    </section>
 
-    const STORE_KEY = 'EDUPREP_PREMIUM_SYNC_V3';
+    <!-- MODULE 2: LIVE EXAM -->
+    <section class="module">
+      <h2>২. Live Exam Creator</h2>
+      <label>পরীক্ষার নাম</label>
+      <input id="examName" placeholder="WB TET Mega Mock" />
+      <label>পরীক্ষা</label>
+      <select id="examTarget"></select>
+      <div class="grid-2" style="margin-top:8px">
+        <div><label>ধরন</label><select id="examType"><option value="MCQ">MCQ</option><option value="BROAD">ব্রড</option></select></div>
+        <div><label>দিন</label><input id="examDays" type="number" value="7" min="1" /></div>
+      </div>
+      <label>সময় (মিনিট)</label>
+      <input id="examMins" type="number" value="60" min="5" />
+      <label>নির্দেশনা</label>
+      <textarea id="examDesc" rows="3"></textarea>
+      <label>🎯 MCQ প্রশ্ন (ঐচ্ছিক)</label>
+      <textarea id="examMcqs" rows="6" placeholder="প্রশ্ন | A | B | C | D | সঠিক(0-3) | ব্যাখ্যা" style="font-family:monospace;font-size:11px"></textarea>
+      <button class="btn btn-success" onclick="saveExam()">▶️ পরীক্ষা চালু</button>
+    </section>
 
-    function getInitialData() {
-      return {
-        updatedAt: Date.now(),
-        mcqs: [
-          {
-            id: 'm1',
-            examId: 'wb_tet',
-            subject: 'বাংলা',
-            question: '‘অহংকার’ শব্দের সঠিক সন্ধি বিচ্ছেদ কোনটি?',
-            options: ['অহং + কার', 'অহঃ + কার', 'অহ + কার', 'অহম + কার'],
-            correctIndex: 1,
-            explanation: 'অহঃ + কার = অহংকার (বিসর্গ সন্ধি)।'
-          },
-          {
-            id: 'm2',
-            examId: 'wb_tet',
-            subject: 'বাংলা',
-            question: 'শিশুদের ভাষা শিক্ষার ক্ষেত্রে কোন দক্ষতাটি সবার আগে অর্জিত হয়?',
-            options: ['পঠন', 'লিখন', 'শ্রবণ', 'কথন'],
-            correctIndex: 2,
-            explanation: 'ভাষা অর্জনের স্বাভাবিক ক্রম হলো: শ্রবণ → কথন → পঠন → লিখন।'
-          }
-        ],
-        scheduledExams: [
-          {
-            id: 'ex_101',
-            title: 'WB TET Mega Mock Test - 01',
-            examId: 'wb_tet',
-            type: 'MCQ',
-            daysDuration: 7,
-            durationMinutes: 60,
-            instructions: 'প্রতিটি প্রশ্নের মান ১ নম্বর। নেগেটিভ মার্কিং নেই।'
-          },
-          {
-            id: 'ex_102',
-            title: 'WBSSC Descriptive Essay & Pedagogy Test',
-            examId: 'wbssc',
-            type: 'BROAD',
-            daysDuration: 5,
-            durationMinutes: 45,
-            instructions: 'আধুনিক শ্রেণিকক্ষে ডিজিটাল ও অংশগ্রহণমূলক শিক্ষণ পদ্ধতির গুরুত্ব ২০০ শব্দের মধ্যে আলোচনা করো।'
-          }
-        ],
-        contents: [
-          {
-            id: 'c1',
-            examId: 'wb_tet',
-            subject: 'বাংলা',
-            type: 'Syllabus',
-            title: 'WB TET বাংলা পূর্ণাঙ্গ সিলেবাস',
-            body: '১. বোধ পরীক্ষণ (গদ্য ও পদ্য)\n২. বাংলা ব্যাকরণ (সন্ধি, সমাস, কারক, পদ পরিবর্তন)\n৩. ভাষা শিক্ষণ ও পেডাগোজি'
-          },
-          {
-            id: 'c2',
-            examId: 'wb_tet',
-            subject: 'বাংলা',
-            type: 'PDF',
-            title: 'WB TET বাংলা ব্যাকরণ মাস্টার পিডিএফ (2.4 MB)',
-            body: 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf'
-          },
-          {
-            id: 'c3',
-            examId: 'wb_tet',
-            subject: 'বাংলা',
-            type: 'Notes',
-            title: 'বিসর্গ সন্ধির সংক্ষিপ্ত নোটস',
-            body: 'বিসর্গের পূর্বে অ-কার এবং পরে বর্গের তৃতীয়, চতুর্থ, পঞ্চম বর্ণ অথবা য, র, ল, ব, হ থাকলে বিসর্গ ও-কারে পরিণত হয়। যেমন: মনঃ + হর = মনোহর।'
-          },
-          {
-            id: 'c4',
-            examId: 'wb_tet',
-            subject: 'বাংলা',
-            type: 'বড় প্রশ্ন',
-            title: 'মাতৃভাষার মাধ্যমে শিক্ষাদানের প্রধান সুবিধাগুলি কী কী?',
-            body: '১. চিন্তার স্বচ্ছতা ও দ্রুত ধারণা গঠন\n২. শিক্ষার্থীদের আত্মবিশ্বাস ও স্বতঃস্ফূর্ত অংশগ্রহণ\n৩. সৃজনশীল প্রকাশক্ষমতার বিকাশ'
-          },
-          {
-            id: 'c5',
-            examId: 'wb_tet',
-            subject: 'বাংলা',
-            type: 'Interview',
-            title: 'প্রশ্ন: আপনি কেন প্রাথমিক শিক্ষক হতে চান?',
-            body: 'আদর্শ উত্তর: শিশুদের শেখার ভিত্তি তৈরি হয় প্রাথমিক স্তরে। তাদের কৌতূহলকে উৎসাহিত করে আনন্দময় পরিবেশে সঠিক দিশা দেওয়াই আমার প্রধান লক্ষ্য।'
-          }
-        ],
-        submissions: []
-      };
+    <!-- MODULE 3: STUDY CONTENT -->
+    <section class="module">
+      <h2>৩. Study Content</h2>
+      <label>পরীক্ষা</label>
+      <select id="cntExam" onchange="updateCntSubjects()"></select>
+      <label>বিষয়</label>
+      <select id="cntSubject"></select>
+      <label>ধরন</label>
+      <select id="cntType"><option>Syllabus</option><option>PDF</option><option>Notes</option><option>বড় প্রশ্ন</option><option>Interview</option></select>
+      <label>শিরোনাম</label>
+      <input id="cntTitle" />
+      <label>বিষয়বস্তু / PDF লিংক</label>
+      <textarea id="cntBody" rows="4"></textarea>
+      <button class="btn btn-primary" onclick="saveContent()">💾 সেভ</button>
+      <label style="margin-top:16px">📋 সাম্প্রতিক কনটেন্ট</label>
+      <div id="recentContentList" style="max-height:200px;overflow-y:auto;margin-top:6px"></div>
+    </section>
+
+    <!-- MODULE 4: EXAM CATEGORY MANAGER (with EDIT) -->
+    <section class="module">
+      <h2>৪. Exam Category Manager</h2>
+      <div id="catEditBanner"></div>
+      <label>পরীক্ষার নাম</label>
+      <input id="catTitle" placeholder="WBPSC Clerkship" />
+      <div class="grid-2" style="margin-top:8px">
+        <div><label>আইকন</label><input id="catIcon" placeholder="🏛️" maxlength="2" style="text-align:center;font-size:20px" /></div>
+        <div><label>ট্যাগ</label><input id="catTag" placeholder="WBPSC" maxlength="8" /></div>
+      </div>
+      <label>সংক্ষিপ্ত বিবরণ</label>
+      <input id="catDesc" placeholder="ক্লার্কশিপ" />
+      <label>রঙ</label>
+      <div id="gradPicker" style="margin-bottom:8px"></div>
+      <div class="btn-row">
+        <button class="btn btn-primary" id="catSaveBtn" onclick="saveExamCategory()">➕ নতুন পরীক্ষা</button>
+        <button class="btn btn-ghost" id="catCancelBtn" onclick="cancelEditCategory()" style="display:none">❌ বাতিল</button>
+      </div>
+      <label style="margin-top:16px">📋 পরীক্ষা (<span id="catCount">0</span>)</label>
+      <div id="catExamList" style="max-height:300px;overflow-y:auto;margin-top:6px"></div>
+    </section>
+
+    <!-- MODULE 5: SUBJECT MANAGER (with EDIT) -->
+    <section class="module">
+      <h2>৫. Subject Manager</h2>
+      <div id="subEditBanner"></div>
+      <label>পরীক্ষা</label>
+      <select id="subMgrExam" onchange="onSubMgrExamChange()"></select>
+      <label>বিষয়ের নাম</label>
+      <input id="subName" placeholder="ভূগোল" />
+      <label>আইকন</label>
+      <input id="subIcon" placeholder="🌍" maxlength="2" style="text-align:center;font-size:20px" />
+      <div class="btn-row">
+        <button class="btn btn-success" id="subSaveBtn" onclick="saveSubject()">➕ বিষয় যোগ</button>
+        <button class="btn btn-ghost" id="subCancelBtn" onclick="cancelEditSubject()" style="display:none">❌ বাতিল</button>
+      </div>
+      <label style="margin-top:16px">📋 বিষয় (<span id="subCount">0</span>)</label>
+      <div id="catSubjectList" style="max-height:300px;overflow-y:auto;margin-top:6px"></div>
+    </section>
+
+    <!-- MODULE 6: NOTIFICATION -->
+    <section class="module">
+      <h2>৬. 🔔 Notification Sender</h2>
+      <label>শিরোনাম</label>
+      <input id="notifTitle" placeholder="নতুন পরীক্ষা এসেছে!" />
+      <label>বার্তা</label>
+      <textarea id="notifBody" rows="3"></textarea>
+      <label>ধরন</label>
+      <select id="notifType"><option value="info">ℹ️ সাধারণ</option><option value="exam">📝 পরীক্ষা</option><option value="update">🔄 আপডেট</option><option value="alert">⚠️ জরুরি</option></select>
+      <button class="btn btn-primary" onclick="sendNotificationAdmin()">📤 পাঠান</button>
+      <label style="margin-top:16px">📬 পাঠানো (<span id="notifCount">0</span>)</label>
+      <div id="notifList" style="max-height:250px;overflow-y:auto;margin-top:6px"></div>
+    </section>
+
+    <!-- MODULE 7: LEADERBOARD -->
+    <section class="module">
+      <h2>৭. 🏆 Leaderboard Manager</h2>
+      <label>ছাত্রের নাম</label>
+      <input id="lbName" placeholder="রাহুল দাস" />
+      <div class="grid-2" style="margin-top:8px">
+        <div><label>স্কোর</label><input id="lbScore" type="number" placeholder="85" min="0" max="100" /></div>
+        <div><label>পরীক্ষা</label><select id="lbExam"></select></div>
+      </div>
+      <button class="btn btn-primary" onclick="addLeaderboardEntry()">➕ এন্ট্রি যোগ</button>
+      <button class="btn btn-ghost" onclick="seedLeaderboard()">🌱 স্যাম্পল (২০ জন)</button>
+      <label style="margin-top:16px">👥 মোট (<span id="lbCount">0</span>)</label>
+      <div id="lbList" style="max-height:250px;overflow-y:auto;margin-top:6px"></div>
+    </section>
+
+    <!-- MODULE 8: DAILY CHALLENGE -->
+    <section class="module">
+      <h2>৮. 🎯 Daily Challenge</h2>
+      <label>তারিখ</label>
+      <input id="dcDate" type="date" />
+      <label>MCQ বাছুন</label>
+      <select id="dcMcq"></select>
+      <label>বোনাস পয়েন্ট</label>
+      <input id="dcBonus" type="number" value="50" min="10" max="500" />
+      <button class="btn btn-success" onclick="saveDailyChallenge()">🎯 চ্যালেঞ্জ সেট</button>
+      <label style="margin-top:16px">📅 সেট করা (<span id="dcCount">0</span>)</label>
+      <div id="dcList" style="max-height:250px;overflow-y:auto;margin-top:6px"></div>
+    </section>
+
+    <!-- MODULE 9: JOB NOTIFICATIONS (with EDIT) -->
+    <section class="module" style="border:2px solid var(--brand)">
+      <h2>৯. 💼 Job Notification Manager</h2>
+      <div id="jobEditBanner"></div>
+      <label>চাকরির নাম *</label>
+      <input id="jobTitle" placeholder="WB Police Constable 2025" />
+      <label>প্রতিষ্ঠান</label>
+      <input id="jobOrg" placeholder="West Bengal Police" />
+      <label>ধরন</label>
+      <select id="jobType"><option value="link">🔗 লিংক</option><option value="pdf">📄 PDF</option><option value="text">📝 টেক্সট</option></select>
+      <label>URL / PDF লিংক</label>
+      <input id="jobUrl" placeholder="https://..." />
+      <label>বিবরণ</label>
+      <textarea id="jobDesc" rows="3"></textarea>
+      <label>শেষ তারিখ</label>
+      <input id="jobDeadline" type="date" />
+      <label>রঙ</label>
+      <div id="jobColorPicker" style="margin-bottom:8px"></div>
+      <div class="btn-row">
+        <button class="btn btn-primary" id="jobSaveBtn" onclick="saveJobNotification()">➕ বিজ্ঞপ্তি যোগ</button>
+        <button class="btn btn-ghost" id="jobCancelBtn" onclick="cancelEditJob()" style="display:none">❌ বাতিল</button>
+      </div>
+      <label style="margin-top:16px">📋 বর্তমান (<span id="adminJobCount">0</span>)</label>
+      <div id="adminJobList" style="max-height:300px;overflow-y:auto;margin-top:6px"></div>
+    </section>
+
+    <!-- MODULE 10: IMPORT -->
+    <section class="module">
+      <h2>১০. Import / Restore</h2>
+      <div class="drop-zone" id="dropZone">
+        <div style="font-size:32px;margin-bottom:6px">📂</div>
+        <div style="font-weight:700">JSON ফাইল ড্র্যাগ করুন</div>
+        <div class="muted">অথবা ক্লিক করুন</div>
+        <input type="file" id="importFile" accept=".json" hidden />
+      </div>
+      <p class="muted" style="font-size:11px">⚠️ Import করলে পুরোনো ডেটা মুছে যাবে।</p>
+    </section>
+
+    <section class="module">
+      <h2>📊 স্ট্যাটাস</h2>
+      <div id="statsBox"></div>
+    </section>
+
+    <section class="module">
+      <h2>✍️ ছাত্রদের ব্রড উত্তর</h2>
+      <div id="subsBox" style="max-height:400px;overflow:auto"></div>
+    </section>
+
+    <section class="module">
+      <h2>🗑️ Danger Zone</h2>
+      <button class="btn btn-danger" onclick="wipeAllData()">⚠️ সব ডেটা মুছুন</button>
+    </section>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ========== CONFIG ========== */
+const APP_VERSION='1.2.1',APP_BUILD='121',APP_NAME='West Bengal: Exam & Mock Hub',ADMIN_EMAIL='wasim0018@gmail.com';
+const DEFAULT_EXAMS=[{id:'wbssc',type:'exam',title:'WBSSC',tag:'SSC',grad:'linear-gradient(135deg,#6366f1,#2563eb)',icon:'🏛️',desc:'বিষয়ভিত্তিক প্রস্তুতি',order:0},{id:'wb_tet',type:'exam',title:'WB TET',tag:'TET',grad:'linear-gradient(135deg,#10b981,#0d9488)',icon:'🎓',desc:'প্রাইমারি শিক্ষক',order:1},{id:'upper_primary_tet',type:'exam',title:'Upper Primary TET',tag:'UP',grad:'linear-gradient(135deg,#8b5cf6,#6366f1)',icon:'📘',desc:'উচ্চ প্রাথমিক',order:2},{id:'ctet',type:'exam',title:'CTET',tag:'CTET',grad:'linear-gradient(135deg,#f59e0b,#ea580c)',icon:'🌟',desc:'কেন্দ্রীয় শিক্ষক',order:3},{id:'miscellaneous',type:'exam',title:'Misc Exam',tag:'MISC',grad:'linear-gradient(135deg,#db2777,#e11d48)',icon:'🧩',desc:'বিবিধ',order:4},{id:'clerkship',type:'exam',title:'Clerkship',tag:'CLK',grad:'linear-gradient(135deg,#0891b2,#2563eb)',icon:'🗂️',desc:'ক্লার্কশিপ',order:5},{id:'wbssc_group_cd',type:'exam',title:'Group C & D',tag:'GRP',grad:'linear-gradient(135deg,#7c3aed,#c026d3)',icon:'📋',desc:'গ্রুপ সি/ডি',order:6},{id:'police_exam',type:'exam',title:'Police Exam',tag:'POL',grad:'linear-gradient(135deg,#334155,#0f172a)',icon:'🛡️',desc:'পুলিশ নিয়োগ',order:7}];
+const DEFAULT_EXAM_SUBJECTS={'wbssc':['বাংলা','ইংরেজি','গণিত','সাধারণ জ্ঞান'],'wb_tet':['বাংলা','ইংরেজি','গণিত','পরিবেশ বিদ্যা','পেডাগোজি'],'upper_primary_tet':['বাংলা','ইংরেজি','গণিত','বিজ্ঞান','পেডাগোজি'],'ctet':['বাংলা','ইংরেজি','গণিত','বিজ্ঞান','সমাজবিজ্ঞান','পেডাগোজি'],'miscellaneous':['বাংলা','ইংরেজি','গণিত','সাধারণ জ্ঞান'],'clerkship':['বাংলা','ইংরেজি','গণিত','কম্পিউটার'],'wbssc_group_cd':['বাংলা','ইংরেজি','গণিত','সাধারণ জ্ঞান'],'police_exam':['বাংলা','ইংরেজি','গণিত','সাধারণ জ্ঞান']};
+const SUBJECT_ICONS={'বাংলা':'✍️','ইংরেজি':'🔤','গণিত':'➗','পরিবেশ বিদ্যা':'🌿','সাধারণ জ্ঞান':'🌐','পেডাগোজি':'🧠','বিজ্ঞান':'🔬','সমাজবিজ্ঞান':'🏛️','কম্পিউটার':'💻','ভূগোল':'🌍','ইতিহাস':'📜'};
+const CONTENT_TYPES=[{key:'Syllabus',label:'সিলেবাস',icon:'📋'},{key:'PDF',label:'PDF',icon:'📄'},{key:'Notes',label:'নোটস',icon:'📝'},{key:'বড় প্রশ্ন',label:'বড় প্রশ্ন',icon:'✍️'},{key:'Interview',label:'ইন্টারভিউ',icon:'💼'}];
+const GRADIENTS=[{name:'Indigo',value:'linear-gradient(135deg,#6366f1,#2563eb)'},{name:'Emerald',value:'linear-gradient(135deg,#10b981,#0d9488)'},{name:'Purple',value:'linear-gradient(135deg,#8b5cf6,#6366f1)'},{name:'Amber',value:'linear-gradient(135deg,#f59e0b,#ea580c)'},{name:'Pink',value:'linear-gradient(135deg,#db2777,#e11d48)'},{name:'Cyan',value:'linear-gradient(135deg,#0891b2,#2563eb)'},{name:'Fuchsia',value:'linear-gradient(135deg,#7c3aed,#c026d3)'},{name:'Slate',value:'linear-gradient(135deg,#334155,#0f172a)'},{name:'Rose',value:'linear-gradient(135deg,#e11d48,#9333ea)'},{name:'Teal',value:'linear-gradient(135deg,#0d9488,#0891b2)'},{name:'Lime',value:'linear-gradient(135deg,#65a30d,#0d9488)'},{name:'Sunset',value:'linear-gradient(135deg,#f97316,#db2777)'}];
+const JOB_COLORS=['linear-gradient(135deg,#6366f1,#2563eb)','linear-gradient(135deg,#10b981,#0d9488)','linear-gradient(135deg,#8b5cf6,#6366f1)','linear-gradient(135deg,#f59e0b,#ea580c)','linear-gradient(135deg,#db2777,#e11d48)','linear-gradient(135deg,#0891b2,#2563eb)'];
+const SEED_NAMES=['রাহুল দাস','প্রিয়া মন্ডল','অর্জুন ঘোষ','সুচিত্রা পাল','বিকাশ সাহা','অনন্যা ভট্ট','সৌরভ দে','মৌমিতা রায়','দেবজিৎ কর','তানিয়া ইসলাম','সুমন চক্রবর্তী','রিয়া সেন','অভিষেক দত্ত','পূজা হালদার','নীলাদ্রি বাগ','কৌশিক ব্যানার্জি','স্নেহা মজুমদার','সায়ন ভৌমিক','লিপিকা দাস','রাজেশ শর্মা'];
+
+/* ========== INDEXEDDB ========== */
+const DB_NAME='EduPrepDB',DB_VERSION=6;let _db=null;
+function openDB(){if(_db)return Promise.resolve(_db);return new Promise((res,rej)=>{const r=indexedDB.open(DB_NAME,DB_VERSION);r.onupgradeneeded=e=>{const db=e.target.result;['mcqs','exams','contents','submissions','categories','bookmarks','leaderboard','notifications','dailyChallenges','challengeCompletions','jobNotifications'].forEach(n=>{if(!db.objectStoreNames.contains(n))db.createObjectStore(n,{keyPath:'id'})});if(!db.objectStoreNames.contains('meta'))db.createObjectStore('meta',{keyPath:'key'})};r.onsuccess=()=>{_db=r.result;res(_db)};r.onerror=()=>rej(r.error)})}
+async function getAll(s){const db=await openDB();return new Promise((res,rej)=>{const tx=db.transaction(s,'readonly'),r=tx.objectStore(s).getAll();r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error)})}
+async function putAll(s,items){if(!items?.length)return;const db=await openDB();const tx=db.transaction(s,'readwrite'),st=tx.objectStore(s);items.forEach(i=>st.put(i));return new Promise((res,rej)=>{tx.oncomplete=res;tx.onerror=()=>rej(tx.error)})}
+async function deleteFrom(s,id){const db=await openDB();const tx=db.transaction(s,'readwrite');tx.objectStore(s).delete(id);return new Promise((res,rej)=>{tx.oncomplete=res;tx.onerror=()=>rej(tx.error)})}
+async function clearAll(s){const db=await openDB();const tx=db.transaction(s,'readwrite');tx.objectStore(s).clear();return new Promise((res,rej)=>{tx.oncomplete=res;tx.onerror=()=>rej(tx.error)})}
+async function setMeta(k,v){const db=await openDB();const tx=db.transaction('meta','readwrite');tx.objectStore('meta').put({key:k,value:v});return new Promise(r=>{tx.oncomplete=r})}
+async function getMeta(k){const db=await openDB();return new Promise((res,rej)=>{const tx=db.transaction('meta','readonly'),r=tx.objectStore('meta').get(k);r.onsuccess=()=>res(r.result?.value);r.onerror=()=>rej(r.error)})}
+async function seedCategories(){const items=[...DEFAULT_EXAMS];DEFAULT_EXAMS.forEach(exam=>{const subs=DEFAULT_EXAM_SUBJECTS[exam.id]||['বাংলা','ইংরেজি','গণিত'];subs.forEach((name,i)=>{items.push({id:`sub_${exam.id}_${i}`,type:'subject',examId:exam.id,name,icon:SUBJECT_ICONS[name]||'📖',order:i})})});await putAll('categories',items)}
+async function migrateCategories(cats){const hasOld=cats.some(c=>c.type==='subject'&&!c.examId);if(!hasOld)return cats;const oldExams=cats.filter(c=>c.type==='exam'),examsToUse=oldExams.length?oldExams:DEFAULT_EXAMS;await clearAll('categories');const items=[...examsToUse];examsToUse.forEach(exam=>{const defaults=DEFAULT_EXAM_SUBJECTS[exam.id]||['বাংলা','ইংরেজি','গণিত','সাধারণ জ্ঞান'];defaults.forEach((name,i)=>{items.push({id:`sub_${exam.id}_${i}`,type:'subject',examId:exam.id,name,icon:SUBJECT_ICONS[name]||'📖',order:i})})});await putAll('categories',items);return items}
+async function bulkImport(json){const stores=['mcqs','exams','contents','submissions','categories','bookmarks','leaderboard','notifications','dailyChallenges','challengeCompletions','jobNotifications'];for(const s of stores)await clearAll(s);await putAll('mcqs',json.mcqs||[]);await putAll('exams',json.exams||json.scheduledExams||[]);await putAll('contents',json.contents||[]);await putAll('submissions',json.submissions||[]);await putAll('bookmarks',(json.bookmarks||[]).map(b=>typeof b==='string'?{id:b,savedAt:Date.now()}:b));await putAll('leaderboard',json.leaderboard||[]);await putAll('notifications',json.notifications||[]);await putAll('dailyChallenges',json.dailyChallenges||[]);await putAll('challengeCompletions',json.challengeCompletions||[]);await putAll('jobNotifications',json.jobNotifications||[]);if(json.categories?.length)await putAll('categories',json.categories);else await seedCategories();await setMeta('updatedAt',Date.now())}
+async function exportSnapshot(){return{version:7,updatedAt:Date.now(),mcqs:await getAll('mcqs'),scheduledExams:await getAll('exams'),contents:await getAll('contents'),submissions:await getAll('submissions'),categories:await getAll('categories'),bookmarks:await getAll('bookmarks'),leaderboard:await getAll('leaderboard'),notifications:await getAll('notifications'),dailyChallenges:await getAll('dailyChallenges'),challengeCompletions:await getAll('challengeCompletions'),jobNotifications:await getAll('jobNotifications')}}
+
+/* ========== STATE ========== */
+let state={
+  mcqs:[],exams:[],contents:[],submissions:[],bookmarks:[],
+  leaderboard:[],notifications:[],dailyChallenges:[],challengeCompletions:[],
+  jobNotifications:[],examTypes:[],subjectList:[],
+  ui:{
+    pickedGradient:0,
+    pickedJobColor:0,
+    editingSubjectId:null,
+    editingCategoryId:null,
+    editingJobId:null
+  }
+};
+let _fbAuth=null,_fbPull=null,_fbPush=null,_fbSignIn=null,_fbSignOut=null,_fbOnStateChange=null;
+
+/* ========== FIREBASE INIT ========== */
+async function initFirebase(){
+  try{
+    const sync=await import('./firebase-sync.js');
+    const authMod=await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js");
+    _fbAuth=authMod.getAuth(sync.app);
+    _fbPull=sync.pullContent;_fbPush=sync.pushContent;
+    _fbSignIn=authMod.signInWithEmailAndPassword;_fbSignOut=authMod.signOut;_fbOnStateChange=authMod.onAuthStateChanged;
+    _fbOnStateChange(_fbAuth,handleAuthChange);
+  }catch(e){console.error('Firebase init failed:',e);document.getElementById('loginErr').textContent='❌ Firebase কনফিগারেশন প্রয়োজন'}
+}
+async function handleAuthChange(user){
+  if(user&&user.email===ADMIN_EMAIL){
+    document.getElementById('loginScreen').style.display='none';
+    document.getElementById('adminApp').style.display='block';
+    document.getElementById('adminEmailDisplay').textContent=user.email;
+    await loadAdminData();
+  }else{
+    document.getElementById('loginScreen').style.display='flex';
+    document.getElementById('adminApp').style.display='none';
+  }
+}
+async function adminLogin(){
+  const email=document.getElementById('loginEmail').value.trim();
+  const password=document.getElementById('loginPassword').value;
+  const err=document.getElementById('loginErr');err.textContent='';
+  if(!email||!password){err.textContent='❌ ইমেইল ও পাসওয়ার্ড দিন';return}
+  if(email.toLowerCase()!==ADMIN_EMAIL.toLowerCase()){err.textContent='❌ এই ইমেইল অনুমোদিত নয়';return}
+  try{await _fbSignIn(_fbAuth,email,password);toast('✅ লগইন সফল','success')}catch(e){err.textContent='❌ ভুল ইমেইল বা পাসওয়ার্ড'}
+}
+async function adminLogout(){if(!confirm('লগআউট করবেন?'))return;try{await _fbSignOut(_fbAuth);toast('🚪 লগআউট হয়েছে','success')}catch(e){}}
+
+/* ========== LOAD DATA ========== */
+async function loadAdminData(){
+  try{if(_fbPull){const remote=await _fbPull();if(remote){await bulkImport(remote);await setMeta('lastSyncAt',remote.updatedAt||Date.now())}}}catch(e){console.log('Initial pull failed:',e)}
+  await refreshState();
+  fillAdminSelects();
+  renderAdmin();
+}
+
+/* ⭐ FIXED refreshState() — now reloads categories too! */
+async function refreshState(){
+  // ⭐ Reload categories FIRST
+  let cats=await getAll('categories');
+  if(!cats.length){await seedCategories();cats=await getAll('categories')}
+  else{cats=await migrateCategories(cats)}
+  
+  const[mcqs,exams,contents,submissions,bookmarks,leaderboard,notifications,dailyChallenges,challengeCompletions,jobNotifications]=await Promise.all([getAll('mcqs'),getAll('exams'),getAll('contents'),getAll('submissions'),getAll('bookmarks'),getAll('leaderboard'),getAll('notifications'),getAll('dailyChallenges'),getAll('challengeCompletions'),getAll('jobNotifications')]);
+  state.mcqs=mcqs;state.exams=exams;state.contents=contents;state.submissions=submissions;state.bookmarks=bookmarks;
+  state.leaderboard=leaderboard;
+  state.notifications=notifications.sort((a,b)=>(b.createdAt||0)-(a.createdAt||0));
+  state.dailyChallenges=dailyChallenges;
+  state.challengeCompletions=challengeCompletions;
+  state.jobNotifications=jobNotifications.sort((a,b)=>(b.createdAt||0)-(a.createdAt||0));
+  
+  // ⭐ CRITICAL FIX: Reload examTypes & subjectList!
+  state.examTypes=cats.filter(c=>c.type==='exam').sort((a,b)=>(a.order||0)-(b.order||0));
+  state.subjectList=cats.filter(c=>c.type==='subject').sort((a,b)=>(a.order||0)-(b.order||0));
+}
+
+/* ========== CLOUD ========== */
+async function pushToCloud(){if(!_fbPush)return toast('❌ Firebase নেই','error');try{toast('☁️ আপলোড হচ্ছে...');const data=await exportSnapshot();await _fbPush(data);await setMeta('lastSyncAt',Date.now());toast('☁️ ক্লাউডে সফল!','success')}catch(e){console.error(e);toast('❌ আপলোড ব্যর্থ','error')}}
+async function pullFromCloud(){if(!_fbPull)return toast('❌ Firebase নেই','error');try{toast('🔄 নামানো হচ্ছে...');const remote=await _fbPull();if(!remote)return toast('❌ ক্লাউডে কিছু নেই','error');await bulkImport(remote);await setMeta('lastSyncAt',remote.updatedAt||Date.now());await loadAdminData();toast('✅ ক্লাউড থেকে লোড','success')}catch(e){toast('❌ নামানো ব্যর্থ','error')}}
+
+/* ========== HELPERS ========== */
+const toastEl=document.getElementById('toast');
+function toast(msg,type=''){toastEl.textContent=msg;toastEl.className='toast show '+type;clearTimeout(toast._t);toast._t=setTimeout(()=>toastEl.className='toast '+type,2400)}
+function esc(s=''){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function normalizeStr(s){return String(s||'').trim().toLowerCase()}
+function getSubjectsForExam(id){return state.subjectList.filter(s=>s.examId===id)}
+function getExamMcqs(examId,subject){const n=normalizeStr(subject);return state.mcqs.filter(m=>m.examId===examId&&normalizeStr(m.subject)===n)}
+function getExamContents(examId,subject){const n=normalizeStr(subject);return state.contents.filter(c=>c.examId===examId&&normalizeStr(c.subject)===n)}
+function getTodayDate(){const d=new Date();return`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`}
+function daysUntilDeadline(d){if(!d)return null;const now=new Date();now.setHours(0,0,0,0);const dl=new Date(d);dl.setHours(0,0,0,0);return Math.ceil((dl-now)/86400000)}
+function scrollToId(id){const el=document.getElementById(id);if(el)el.scrollIntoView({behavior:'smooth',block:'center'})}
+
+/* ========== FILL SELECTS ========== */
+function fillAdminSelects(){
+  const eo=state.examTypes.map(e=>`<option value="${e.id}">${esc(e.title)}</option>`).join('');
+  ['mcqExam','examTarget','cntExam','subMgrExam','lbExam'].forEach(id=>{
+    const el=document.getElementById(id);
+    if(el){
+      const curr=el.value;
+      el.innerHTML=eo;
+      if(curr&&state.examTypes.find(e=>e.id===curr))el.value=curr;
     }
+  });
+  updateMcqSubjects();updateCntSubjects();renderSubjectList();
+  const dd=document.getElementById('dcDate');if(dd&&!dd.value)dd.value=getTodayDate();
+  const dm=document.getElementById('dcMcq');if(dm){dm.innerHTML=state.mcqs.slice(0,100).map(m=>`<option value="${m.id}">${esc((m.question||'').slice(0,50))}...</option>`).join('')||'<option value="">— MCQ নেই —</option>'}
+  renderNotifList();renderLbList();renderDcList();renderRecentContent();renderAdminJobList();
+  renderGradientPicker();renderJobColorPicker();renderCategoryLists();
+}
+function updateMcqSubjects(){const e=document.getElementById('mcqExam')?.value;const el=document.getElementById('mcqSubject');if(el)el.innerHTML=getSubjectsForExam(e).map(s=>`<option value="${esc(s.name)}">${esc(s.name)}</option>`).join('')||'<option value="">— বিষয় নেই —</option>'}
+function updateCntSubjects(){const e=document.getElementById('cntExam')?.value;const el=document.getElementById('cntSubject');if(el)el.innerHTML=getSubjectsForExam(e).map(s=>`<option value="${esc(s.name)}">${esc(s.name)}</option>`).join('')||'<option value="">— বিষয় নেই —</option>'}
+function onSubMgrExamChange(){
+  if(state.ui.editingSubjectId)cancelEditSubject();
+  renderSubjectList();
+}
 
-    function readStore() {
-      const raw = localStorage.getItem(STORE_KEY);
-      if (raw) return JSON.parse(raw);
-      const init = getInitialData();
-      localStorage.setItem(STORE_KEY, JSON.stringify(init));
-      return init;
-    }
+/* ========== EDIT MODE BANNERS ========== */
+function renderEditBanners(){
+  // Subject
+  const sb=document.getElementById('subEditBanner');
+  if(sb){
+    if(state.ui.editingSubjectId){
+      const s=state.subjectList.find(x=>x.id===state.ui.editingSubjectId);
+      sb.innerHTML=`<div class="edit-mode-banner">✏️ এডিট মোড: <strong>${esc(s?.name||'')}</strong></div>`;
+    }else sb.innerHTML='';
+  }
+  // Category
+  const cb=document.getElementById('catEditBanner');
+  if(cb){
+    if(state.ui.editingCategoryId){
+      const c=state.examTypes.find(x=>x.id===state.ui.editingCategoryId);
+      cb.innerHTML=`<div class="edit-mode-banner">✏️ এডিট মোড: <strong>${esc(c?.title||'')}</strong></div>`;
+    }else cb.innerHTML='';
+  }
+  // Job
+  const jb=document.getElementById('jobEditBanner');
+  if(jb){
+    if(state.ui.editingJobId){
+      const j=state.jobNotifications.find(x=>x.id===state.ui.editingJobId);
+      jb.innerHTML=`<div class="edit-mode-banner">✏️ এডিট মোড: <strong>${esc(j?.title||'')}</strong></div>`;
+    }else jb.innerHTML='';
+  }
+}
 
-    function writeStore(store) {
-      store.updatedAt = Date.now();
-      localStorage.setItem(STORE_KEY, JSON.stringify(store));
-      renderAdmin();
-    }
+/* ========== RENDER LISTS ========== */
+function renderSubjectList(){
+  const e=document.getElementById('subMgrExam')?.value;
+  if(!e)return;
+  const subs=getSubjectsForExam(e);
+  const ce=document.getElementById('subCount');if(ce)ce.textContent=subs.length;
+  const le=document.getElementById('catSubjectList');
+  if(le){
+    le.innerHTML=subs.length?subs.map(s=>`
+      <div class="cat-item" style="${state.ui.editingSubjectId===s.id?'border-color:var(--warning);background:rgba(245,158,11,.08)':''}">
+        <div class="cat-icon" style="background:rgba(var(--brand-rgb),.15);color:var(--text)">${s.icon}</div>
+        <div style="flex:1;min-width:0"><div style="font-weight:800;font-size:12px">${esc(s.name)}</div></div>
+        <button class="btn btn-sm btn-warning btn-icon" onclick="editSubject('${s.id}')" title="Edit">✏️</button>
+        <button class="btn btn-sm btn-danger btn-icon" onclick="deleteSubject('${s.id}')" title="Delete">×</button>
+      </div>`).join(''):'<p class="muted" style="font-size:11px">কোনো বিষয় নেই</p>';
+  }
+  renderEditBanners();
+}
 
-    function exportJsonFile() {
-      const store = readStore();
-      const blob = new Blob([JSON.stringify(store, null, 2)], { type: 'application/json' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = 'eduprep_data.json';
-      a.click();
-      URL.revokeObjectURL(url);
-    }
-
-    function importJsonBackup(event) {
-      const file = event.target.files[0];
-      if (!file) return;
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        try {
-          const parsed = JSON.parse(e.target.result);
-          if (parsed && Array.isArray(parsed.mcqs)) {
-            writeStore(parsed);
-            alert('✅ ব্যাকআপ ফাইল সফলভাবে লোড হয়েছে!');
-          } else {
-            alert('❌ সঠিক EduPrep JSON ফাইল নয়।');
-          }
-        } catch {
-          alert('❌ ফাইল পড়তে সমস্যা হয়েছে।');
-        }
-      };
-      reader.readAsText(file);
-    }
-
-    function loadSampleMcqs(count) {
-      const lines = [];
-      for (let i = 1; i <= count; i++) {
-        lines.push(`প্র্যাকটিস প্রশ্ন ${i}: গঠনামূলক মূল্যায়নের (Formative Evaluation) প্রধান লক্ষ্য কী? | শুধু নম্বর দেওয়া | শিখন ঘাটতি চিহ্নিত ও সংশোধন করা | বার্ষিক ফলাফল তৈরি | সিলেবাস শেষ করা | 1 | গঠনামূলক মূল্যায়নের মাধ্যমে পাঠ চলাকালীন শিক্ষার্থীর অগ্রগতি যাচাই করা হয়।`);
-      }
-      document.getElementById('mcqBulkText').value = lines.join('\n');
-    }
-
-    function publishBulkMcqs() {
-      const store = readStore();
-      const examId = document.getElementById('mcqExam').value;
-      const subject = document.getElementById('mcqSubject').value;
-      const rows = document.getElementById('mcqBulkText').value.split('\n').map(r => r.trim()).filter(Boolean);
-
-      if (!rows.length) return alert('আগে ৫০ বা ১০০টি MCQ লোড বা পেস্ট করুন।');
-
-      let count = 0;
-      rows.forEach(row => {
-        const p = row.split('|').map(x => x.trim());
-        if (p.length >= 6) {
-          store.mcqs.push({
-            id: 'mcq_' + Date.now() + '_' + Math.random().toString(36).slice(2, 6),
-            examId,
-            subject,
-            question: p[0],
-            options: [p[1], p[2], p[3], p[4]],
-            correctIndex: Number(p[5]) || 0,
-            explanation: p[6] || 'সঠিক উত্তর সংরক্ষিত।'
-          });
-          count++;
-        }
-      });
-
-      writeStore(store);
-      alert(`${count}টি MCQ সেভ হয়েছে! এখন Export Data বাটনে ক্লিক করে ফাইল নামিয়ে নিতে পারেন।`);
-    }
-
-    function publishScheduledExam() {
-      const store = readStore();
-      store.scheduledExams.unshift({
-        id: 'ex_' + Date.now(),
-        title: document.getElementById('examName').value.trim() || 'Live Mock Test',
-        examId: document.getElementById('examTarget').value,
-        type: document.getElementById('examType').value,
-        daysDuration: Number(document.getElementById('examDays').value) || 7,
-        durationMinutes: Number(document.getElementById('examMins').value) || 60,
-        instructions: document.getElementById('examDesc').value.trim() || 'নির্ধারিত সময়ের মধ্যে পরীক্ষা সম্পন্ন করুন।'
-      });
-      writeStore(store);
-      alert('লাইভ পরীক্ষা সেভ ও চালু হয়েছে!');
-    }
-
-    function publishStudyContent() {
-      const store = readStore();
-      store.contents.unshift({
-        id: 'cnt_' + Date.now(),
-        examId: document.getElementById('cntExam').value,
-        subject: document.getElementById('cntSubject').value.trim() || 'বাংলা',
-        type: document.getElementById('cntType').value,
-        title: document.getElementById('cntTitle').value.trim() || 'নতুন স্টাডি কনটেন্ট',
-        body: document.getElementById('cntBody').value.trim() || 'কনটেন্ট যুক্ত হয়েছে।'
-      });
-      writeStore(store);
-      alert('কনটেন্ট সেভ হয়েছে!');
-    }
-
-    function renderAdmin() {
-      const opts = EXAMS.map(e => `<option value="${e.id}">${e.title}</option>`).join('');
-      document.getElementById('mcqExam').innerHTML = opts;
-      document.getElementById('examTarget').innerHTML = opts;
-      document.getElementById('cntExam').innerHTML = opts;
-
-      const store = readStore();
-      document.getElementById('adminStatsBox').innerHTML = `
-        <h3 class="text-base font-bold text-slate-900 mb-3">সেভ করা ডেটা স্ট্যাটাস</h3>
-        <div class="grid grid-cols-3 gap-3 text-center">
-          <div class="p-4 rounded-2xl bg-indigo-50">
-            <p class="text-2xl font-extrabold text-indigo-700">${store.mcqs.length}</p>
-            <p class="text-xs text-slate-600 mt-1">মোট MCQ</p>
-          </div>
-          <div class="p-4 rounded-2xl bg-emerald-50">
-            <p class="text-2xl font-extrabold text-emerald-700">${store.scheduledExams.length}</p>
-            <p class="text-xs text-slate-600 mt-1">লাইভ পরীক্ষা</p>
-          </div>
-          <div class="p-4 rounded-2xl bg-amber-50">
-            <p class="text-2xl font-extrabold text-amber-700">${store.contents.length}</p>
-            <p class="text-xs text-slate-600 mt-1">Study Items</p>
+function renderCategoryLists(){
+  const el=document.getElementById('catExamList');
+  const ce=document.getElementById('catCount');
+  if(ce)ce.textContent=state.examTypes.length;
+  if(el)el.innerHTML=state.examTypes.length?state.examTypes.map(e=>{
+    const subs=getSubjectsForExam(e.id);
+    return `
+      <div class="cat-item" style="${state.ui.editingCategoryId===e.id?'border-color:var(--warning);background:rgba(245,158,11,.08)':''}">
+        <div class="cat-icon" style="background:${e.grad}">${e.icon}</div>
+        <div style="flex:1;min-width:0">
+          <div style="font-weight:800;font-size:12px">${esc(e.title)}</div>
+          <div class="muted" style="font-size:10px;margin-top:2px">
+            ${subs.slice(0,2).map(s=>`<span class="subj-badge">${s.icon} ${esc(s.name)}</span>`).join('')}
+            ${subs.length>2?`<span class="subj-badge">+${subs.length-2}</span>`:''}
           </div>
         </div>
-      `;
+        <button class="btn btn-sm btn-warning btn-icon" onclick="editCategory('${e.id}')" title="Edit">✏️</button>
+        <button class="btn btn-sm btn-danger btn-icon" onclick="deleteCategory('${e.id}')" title="Delete">×</button>
+      </div>
+    `;
+  }).join(''):'<p class="muted" style="font-size:11px">কোনো পরীক্ষা নেই</p>';
+  renderEditBanners();
+}
 
-      document.getElementById('adminSubmissionsBox').innerHTML = `
-        <h3 class="text-base font-bold text-slate-900 mb-3">ছাত্রছাত্রীদের ব্রড পরীক্ষার উত্তর (${store.submissions.length})</h3>
-        ${store.submissions.length ? store.submissions.map(s => `
-          <div class="p-3.5 rounded-2xl bg-slate-50 border border-slate-200 mb-2.5 text-xs">
-            <div class="flex justify-between font-bold text-slate-900">
-              <span>${s.examTitle}</span>
-              <span class="text-indigo-600">${s.studentName}</span>
-            </div>
-            <p class="text-slate-600 mt-1.5 whitespace-pre-line">${s.answer}</p>
-          </div>
-        `).join('') : '<p class="text-xs text-slate-400">ছাত্রছাত্রীরা ব্রড পরীক্ষার উত্তর জমা দিলে এখানে দেখাবে।</p>'}
-      `;
+function renderAdminJobList(){
+  const el=document.getElementById('adminJobList');
+  const cnt=document.getElementById('adminJobCount');
+  if(cnt)cnt.textContent=state.jobNotifications.length;
+  if(!el)return;
+  el.innerHTML=state.jobNotifications.length?state.jobNotifications.map(j=>{
+    const days=daysUntilDeadline(j.deadline);
+    const expired=days!==null&&days<0;
+    return `
+      <div class="cat-item" style="${state.ui.editingJobId===j.id?'border-color:var(--warning);background:rgba(245,158,11,.08)':''}">
+        <div class="cat-icon" style="background:${j.color||'var(--brand)'};font-size:16px;width:36px;height:36px">${j.type==='pdf'?'📄':j.type==='link'?'🔗':'📝'}</div>
+        <div style="flex:1;min-width:0">
+          <div style="font-weight:800;font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(j.title)}</div>
+          <div class="muted" style="font-size:10px">${esc(j.org||'')}${j.deadline?` • ${expired?'শেষ':'শেষ '+j.deadline}`:''}</div>
+        </div>
+        <button class="btn btn-sm btn-warning btn-icon" onclick="editJob('${j.id}')" title="Edit">✏️</button>
+        <button class="btn btn-sm btn-danger btn-icon" onclick="deleteJobNotification('${j.id}')" title="Delete">×</button>
+      </div>
+    `;
+  }).join(''):'<p class="muted" style="font-size:11px">কোনো বিজ্ঞপ্তি নেই</p>';
+  renderEditBanners();
+}
+
+function renderRecentContent(){
+  const el=document.getElementById('recentContentList');if(!el)return;
+  const recent=[...state.contents].sort((a,b)=>(b.createdAt||0)-(a.createdAt||0)).slice(0,10);
+  el.innerHTML=recent.length?recent.map(c=>{
+    const ex=state.examTypes.find(e=>e.id===c.examId);
+    const ti=CONTENT_TYPES.find(t=>t.key===c.type)||{icon:'📄'};
+    return `<div class="cat-item" style="padding:8px">
+      <div class="cat-icon" style="background:rgba(var(--brand-rgb),.15);color:var(--text);font-size:14px;width:32px;height:32px">${ti.icon}</div>
+      <div style="flex:1;min-width:0">
+        <div style="font-weight:800;font-size:11px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(c.title)}</div>
+        <div class="muted" style="font-size:9px">${esc(ex?.title||c.examId)} • ${esc(c.subject)} • ${esc(c.type)}</div>
+      </div>
+      <button class="btn btn-sm btn-danger btn-icon" onclick="deleteContent('${c.id}')">×</button>
+    </div>`;
+  }).join(''):'<p class="muted" style="font-size:11px">কোনো কনটেন্ট নেই</p>';
+}
+
+function renderNotifList(){const el=document.getElementById('notifList');const ce=document.getElementById('notifCount');if(ce)ce.textContent=state.notifications.length;if(el)el.innerHTML=state.notifications.length?state.notifications.slice(0,20).map(n=>`<div class="cat-item"><div class="cat-icon" style="background:rgba(var(--brand-rgb),.15);color:var(--text)">🔔</div><div style="flex:1;min-width:0"><div style="font-weight:800;font-size:12px">${esc(n.title)}</div><div class="muted" style="font-size:10px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(n.body)}</div></div><button class="btn btn-sm btn-danger btn-icon" onclick="deleteNotification('${n.id}')">×</button></div>`).join(''):'<p class="muted" style="font-size:11px">কোনো নোটিফিকেশন নেই</p>'}
+function renderLbList(){const el=document.getElementById('lbList');const ce=document.getElementById('lbCount');if(ce)ce.textContent=state.leaderboard.length;if(el){const s=[...state.leaderboard].sort((a,b)=>(b.score||0)-(a.score||0));el.innerHTML=s.length?s.slice(0,20).map((e,i)=>`<div class="cat-item"><div class="cat-icon" style="background:rgba(var(--brand-rgb),.15);color:var(--text);font-size:14px;font-weight:900">${i+1}</div><div style="flex:1;min-width:0"><div style="font-weight:800;font-size:12px">${esc(e.name)}</div><div class="muted" style="font-size:10px">${esc(e.exam||'')} • ${e.score}</div></div><button class="btn btn-sm btn-danger btn-icon" onclick="deleteLbEntry('${e.id}')">×</button></div>`).join(''):'<p class="muted" style="font-size:11px">কোনো এন্ট্রি নেই</p>'}}
+function renderDcList(){const el=document.getElementById('dcList');const ce=document.getElementById('dcCount');if(ce)ce.textContent=state.dailyChallenges.length;if(el)el.innerHTML=state.dailyChallenges.length?state.dailyChallenges.sort((a,b)=>b.date.localeCompare(a.date)).slice(0,20).map(c=>{const m=state.mcqs.find(x=>x.id===c.mcqId);return`<div class="cat-item"><div class="cat-icon" style="background:rgba(236,72,153,.15);color:var(--text)">🎯</div><div style="flex:1;min-width:0"><div style="font-weight:800;font-size:12px">${c.date} • +${c.bonus}</div><div class="muted" style="font-size:10px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc((m?.question||'').slice(0,40))}</div></div><button class="btn btn-sm btn-danger btn-icon" onclick="deleteDc('${c.id}')">×</button></div>`}).join(''):'<p class="muted" style="font-size:11px">কোনো চ্যালেঞ্জ নেই</p>'}
+
+/* ========== PICKERS ========== */
+function renderGradientPicker(){const el=document.getElementById('gradPicker');if(!el)return;el.innerHTML=GRADIENTS.map((g,i)=>`<button onclick="pickGradient(${i})" class="grad-swatch ${state.ui.pickedGradient===i?'active':''}" style="background:${g.value}" title="${g.name}"></button>`).join('')}
+function pickGradient(i){state.ui.pickedGradient=i;renderGradientPicker()}
+function renderJobColorPicker(){const el=document.getElementById('jobColorPicker');if(!el)return;el.innerHTML=JOB_COLORS.map((c,i)=>`<button onclick="pickJobColor(${i})" class="grad-swatch ${state.ui.pickedJobColor===i?'active':''}" style="background:${c}"></button>`).join('')}
+function pickJobColor(i){state.ui.pickedJobColor=i;renderJobColorPicker()}
+
+/* ========== SAVE SUBJECT (Add + Edit) ========== */
+async function saveSubject(){
+  const eid=document.getElementById('subMgrExam').value;
+  const name=document.getElementById('subName').value.trim();
+  const iconInput=document.getElementById('subIcon').value.trim();
+  if(!name)return toast('বিষয়ের নাম দিন','error');
+  const icon=iconInput||SUBJECT_ICONS[name]||'📖';
+
+  // ⭐ EDIT MODE
+  if(state.ui.editingSubjectId){
+    const existing=state.subjectList.find(s=>s.id===state.ui.editingSubjectId);
+    if(!existing){state.ui.editingSubjectId=null;return toast('বিষয় পাওয়া যায়নি','error')}
+    
+    const oldName=existing.name;
+    const nameChanged=oldName!==name;
+    
+    // Update subject in categories
+    await putAll('categories',[{...existing,name,icon,updatedAt:Date.now()}]);
+    
+    // ⭐ If name changed, update all MCQs and contents referencing old name
+    if(nameChanged){
+      const mcqsToUpdate=state.mcqs.filter(m=>m.examId===existing.examId&&m.subject===oldName);
+      if(mcqsToUpdate.length)await putAll('mcqs',mcqsToUpdate.map(m=>({...m,subject:name})));
+      const contentsToUpdate=state.contents.filter(c=>c.examId===existing.examId&&c.subject===oldName);
+      if(contentsToUpdate.length)await putAll('contents',contentsToUpdate.map(c=>({...c,subject:name})));
     }
+    
+    state.ui.editingSubjectId=null;
+    document.getElementById('subName').value='';
+    document.getElementById('subIcon').value='';
+    const btn=document.getElementById('subSaveBtn');if(btn)btn.textContent='➕ বিষয় যোগ';
+    const cancelBtn=document.getElementById('subCancelBtn');if(cancelBtn)cancelBtn.style.display='none';
+    
+    await refreshState();
+    fillAdminSelects();
+    toast(`✅ "${name}" আপডেট হয়েছে${nameChanged?' (MCQ/কনটেন্টও আপডেট)':''}`,'success');
+    return;
+  }
 
-    window.addEventListener('storage', renderAdmin);
+  // ⭐ ADD NEW MODE
+  if(!eid)return toast('পরীক্ষা নির্বাচন করুন','error');
+  if(state.subjectList.find(s=>s.examId===eid&&normalizeStr(s.name)===normalizeStr(name)))return toast('এই পরীক্ষায় এই বিষয় আগেই আছে','error');
+  
+  await putAll('categories',[{
+    id:'sub_'+Date.now(),
+    type:'subject',
+    examId:eid,
+    name,icon,
+    order:getSubjectsForExam(eid).length,
+    createdAt:Date.now()
+  }]);
+  await refreshState();
+  fillAdminSelects();
+  toast(`✅ "${name}" যোগ হয়েছে`,'success');
+  document.getElementById('subName').value='';
+  document.getElementById('subIcon').value='';
+}
+
+async function editSubject(id){
+  const sub=state.subjectList.find(s=>s.id===id);
+  if(!sub)return;
+  state.ui.editingSubjectId=id;
+  document.getElementById('subMgrExam').value=sub.examId;
+  document.getElementById('subName').value=sub.name;
+  document.getElementById('subIcon').value=sub.icon||'';
+  const btn=document.getElementById('subSaveBtn');if(btn)btn.textContent='✏️ আপডেট করুন';
+  const cancelBtn=document.getElementById('subCancelBtn');if(cancelBtn)cancelBtn.style.display='block';
+  renderSubjectList();
+  scrollToId('subName');
+  toast('✏️ এডিট মোড — তথ্য বদলে "আপডেট করুন" চাপুন');
+}
+
+function cancelEditSubject(){
+  state.ui.editingSubjectId=null;
+  document.getElementById('subName').value='';
+  document.getElementById('subIcon').value='';
+  const btn=document.getElementById('subSaveBtn');if(btn)btn.textContent='➕ বিষয় যোগ';
+  const cancelBtn=document.getElementById('subCancelBtn');if(cancelBtn)cancelBtn.style.display='none';
+  renderSubjectList();
+  toast('❌ এডিট বাতিল হয়েছে');
+}
+
+async function deleteSubject(id){
+  const sub=state.subjectList.find(s=>s.id===id);if(!sub)return;
+  const mc=getExamMcqs(sub.examId,sub.name).length,cc=getExamContents(sub.examId,sub.name).length;
+  if(!confirm(mc+cc>0?`"${sub.name}" মুছলে ${mc} MCQ ও ${cc} কনটেন্ট অপ্রাপ্য হবে। চালিয়ে যাবেন?`:`"${sub.name}" মুছবেন?`))return;
+  await deleteFrom('categories',id);
+  if(state.ui.editingSubjectId===id)cancelEditSubject();
+  await refreshState();
+  fillAdminSelects();
+  toast('🗑️ মুছে ফেলা হয়েছে','success');
+}
+
+/* ========== SAVE EXAM CATEGORY (Add + Edit) ========== */
+async function saveExamCategory(){
+  const title=document.getElementById('catTitle').value.trim();
+  if(!title)return toast('পরীক্ষার নাম দিন','error');
+  const icon=document.getElementById('catIcon').value.trim()||'📚';
+  const tag=document.getElementById('catTag').value.trim()||title.slice(0,4).toUpperCase();
+  const desc=document.getElementById('catDesc').value.trim()||'নতুন পরীক্ষা';
+  const grad=GRADIENTS[state.ui.pickedGradient].value;
+
+  // ⭐ EDIT MODE
+  if(state.ui.editingCategoryId){
+    const existing=state.examTypes.find(e=>e.id===state.ui.editingCategoryId);
+    if(!existing){state.ui.editingCategoryId=null;return toast('পরীক্ষা পাওয়া যায়নি','error')}
+    
+    await putAll('categories',[{...existing,title,icon,tag,desc,grad,updatedAt:Date.now()}]);
+    
+    state.ui.editingCategoryId=null;
+    document.getElementById('catTitle').value='';
+    document.getElementById('catIcon').value='';
+    document.getElementById('catTag').value='';
+    document.getElementById('catDesc').value='';
+    const btn=document.getElementById('catSaveBtn');if(btn)btn.textContent='➕ নতুন পরীক্ষা';
+    const cancelBtn=document.getElementById('catCancelBtn');if(cancelBtn)cancelBtn.style.display='none';
+    
+    await refreshState();
+    fillAdminSelects();
+    toast(`✅ "${title}" আপডেট হয়েছে`,'success');
+    return;
+  }
+
+  // ⭐ ADD NEW MODE
+  const id='exam_'+Date.now();
+  const order=state.examTypes.length;
+  const items=[{id,type:'exam',title,icon,tag,desc,grad,order,createdAt:Date.now()}];
+  ['বাংলা','ইংরেজি','গণিত','সাধারণ জ্ঞান'].forEach((name,i)=>{
+    items.push({id:`sub_${id}_${i}`,type:'subject',examId:id,name,icon:SUBJECT_ICONS[name]||'📖',order:i})
+  });
+  await putAll('categories',items);
+  await refreshState();
+  fillAdminSelects();
+  toast(`✅ "${title}" + ৪টি বিষয় যোগ`,'success');
+  document.getElementById('catTitle').value='';
+  document.getElementById('catIcon').value='';
+  document.getElementById('catTag').value='';
+  document.getElementById('catDesc').value='';
+}
+
+async function editCategory(id){
+  const cat=state.examTypes.find(e=>e.id===id);
+  if(!cat)return;
+  state.ui.editingCategoryId=id;
+  document.getElementById('catTitle').value=cat.title||'';
+  document.getElementById('catIcon').value=cat.icon||'';
+  document.getElementById('catTag').value=cat.tag||'';
+  document.getElementById('catDesc').value=cat.desc||'';
+  
+  // Find gradient index
+  const gradIdx=GRADIENTS.findIndex(g=>g.value===cat.grad);
+  if(gradIdx>=0){state.ui.pickedGradient=gradIdx;renderGradientPicker()}
+  
+  const btn=document.getElementById('catSaveBtn');if(btn)btn.textContent='✏️ আপডেট করুন';
+  const cancelBtn=document.getElementById('catCancelBtn');if(cancelBtn)cancelBtn.style.display='block';
+  renderCategoryLists();
+  scrollToId('catTitle');
+  toast('✏️ এডিট মোড — তথ্য বদলে "আপডেট করুন" চাপুন');
+}
+
+function cancelEditCategory(){
+  state.ui.editingCategoryId=null;
+  document.getElementById('catTitle').value='';
+  document.getElementById('catIcon').value='';
+  document.getElementById('catTag').value='';
+  document.getElementById('catDesc').value='';
+  const btn=document.getElementById('catSaveBtn');if(btn)btn.textContent='➕ নতুন পরীক্ষা';
+  const cancelBtn=document.getElementById('catCancelBtn');if(cancelBtn)cancelBtn.style.display='none';
+  renderCategoryLists();
+  toast('❌ এডিট বাতিল হয়েছে');
+}
+
+async function deleteCategory(id){
+  const cat=[...state.examTypes,...state.subjectList].find(c=>c.id===id);
+  if(!cat)return;
+  if(cat.type==='subject')return deleteSubject(id);
+  const subs=getSubjectsForExam(id);
+  if(!confirm(`"${cat.title}" এবং ${subs.length}টি বিষয় মুছবেন?`))return;
+  const db=await openDB();const tx=db.transaction('categories','readwrite');const st=tx.objectStore('categories');
+  st.delete(id);subs.forEach(s=>st.delete(s.id));
+  await new Promise(r=>{tx.oncomplete=r});
+  if(state.ui.editingCategoryId===id)cancelEditCategory();
+  await refreshState();
+  fillAdminSelects();
+  toast('🗑️ মুছে ফেলা হয়েছে','success');
+}
+
+/* ========== SAVE JOB (Add + Edit) ========== */
+async function saveJobNotification(){
+  const title=document.getElementById('jobTitle').value.trim();
+  const org=document.getElementById('jobOrg').value.trim();
+  const type=document.getElementById('jobType').value;
+  const url=document.getElementById('jobUrl').value.trim();
+  const desc=document.getElementById('jobDesc').value.trim();
+  const deadline=document.getElementById('jobDeadline').value;
+  const color=JOB_COLORS[state.ui.pickedJobColor]||JOB_COLORS[0];
+  
+  if(!title)return toast('চাকরির নাম দিন','error');
+  if(type!=='text'&&!url)return toast('URL দিন','error');
+
+  // ⭐ EDIT MODE
+  if(state.ui.editingJobId){
+    const existing=state.jobNotifications.find(j=>j.id===state.ui.editingJobId);
+    if(!existing){state.ui.editingJobId=null;return toast('বিজ্ঞপ্তি পাওয়া যায়নি','error')}
+    
+    await putAll('jobNotifications',[{...existing,title,org,type,url,desc,deadline,color,updatedAt:Date.now()}]);
+    
+    state.ui.editingJobId=null;
+    document.getElementById('jobTitle').value='';
+    document.getElementById('jobOrg').value='';
+    document.getElementById('jobUrl').value='';
+    document.getElementById('jobDesc').value='';
+    document.getElementById('jobDeadline').value='';
+    const btn=document.getElementById('jobSaveBtn');if(btn)btn.textContent='➕ বিজ্ঞপ্তি যোগ';
+    const cancelBtn=document.getElementById('jobCancelBtn');if(cancelBtn)cancelBtn.style.display='none';
+    
+    await refreshState();
+    renderAdminJobList();
+    toast(`✅ "${title}" আপডেট হয়েছে`,'success');
+    return;
+  }
+
+  // ⭐ ADD NEW MODE
+  await putAll('jobNotifications',[{
+    id:'job_'+Date.now(),
+    title,org,type,url,desc,deadline,color,
+    createdAt:Date.now()
+  }]);
+  await refreshState();
+  renderAdminJobList();
+  document.getElementById('jobTitle').value='';
+  document.getElementById('jobOrg').value='';
+  document.getElementById('jobUrl').value='';
+  document.getElementById('jobDesc').value='';
+  document.getElementById('jobDeadline').value='';
+  toast('✅ বিজ্ঞপ্তি যোগ হয়েছে। Cloud Push চাপুন!','success');
+}
+
+async function editJob(id){
+  const job=state.jobNotifications.find(j=>j.id===id);
+  if(!job)return;
+  state.ui.editingJobId=id;
+  document.getElementById('jobTitle').value=job.title||'';
+  document.getElementById('jobOrg').value=job.org||'';
+  document.getElementById('jobType').value=job.type||'link';
+  document.getElementById('jobUrl').value=job.url||'';
+  document.getElementById('jobDesc').value=job.desc||'';
+  document.getElementById('jobDeadline').value=job.deadline||'';
+  
+  const colorIdx=JOB_COLORS.indexOf(job.color);
+  if(colorIdx>=0){state.ui.pickedJobColor=colorIdx;renderJobColorPicker()}
+  
+  const btn=document.getElementById('jobSaveBtn');if(btn)btn.textContent='✏️ আপডেট করুন';
+  const cancelBtn=document.getElementById('jobCancelBtn');if(cancelBtn)cancelBtn.style.display='block';
+  renderAdminJobList();
+  scrollToId('jobTitle');
+  toast('✏️ এডিট মোড — তথ্য বদলে "আপডেট করুন" চাপুন');
+}
+
+function cancelEditJob(){
+  state.ui.editingJobId=null;
+  document.getElementById('jobTitle').value='';
+  document.getElementById('jobOrg').value='';
+  document.getElementById('jobUrl').value='';
+  document.getElementById('jobDesc').value='';
+  document.getElementById('jobDeadline').value='';
+  const btn=document.getElementById('jobSaveBtn');if(btn)btn.textContent='➕ বিজ্ঞপ্তি যোগ';
+  const cancelBtn=document.getElementById('jobCancelBtn');if(cancelBtn)cancelBtn.style.display='none';
+  renderAdminJobList();
+  toast('❌ এডিট বাতিল হয়েছে');
+}
+
+async function deleteJobNotification(id){
+  if(!confirm('এই বিজ্ঞপ্তি মুছবেন?'))return;
+  await deleteFrom('jobNotifications',id);
+  if(state.ui.editingJobId===id)cancelEditJob();
+  await refreshState();
+  renderAdminJobList();
+  toast('🗑️ মুছে ফেলা হয়েছে','success');
+}
+
+/* ========== SAVE MCQ ========== */
+async function saveMcqs(){
+  const eid=document.getElementById('mcqExam').value;
+  const sub=document.getElementById('mcqSubject').value;
+  if(!sub)return toast('বিষয় নির্বাচন করুন','error');
+  const rows=document.getElementById('mcqText').value.split('\n').map(r=>r.trim()).filter(Boolean);
+  if(!rows.length)return toast('আগে MCQ পেস্ট করুন','error');
+  const items=[];
+  const seen=new Set(state.mcqs.map(m=>m.question.trim()));
+  rows.forEach(r=>{const p=r.split('|').map(x=>x.trim());if(p.length<6)return;const ci=Number(p[5]);if(isNaN(ci)||ci<0||ci>3)return;if(seen.has(p[0]))return;seen.add(p[0]);items.push({id:'mcq_'+Date.now()+'_'+Math.random().toString(36).slice(2,8),examId:eid,subject:sub,question:p[0],options:[p[1],p[2],p[3],p[4]],correctIndex:ci,explanation:p[6]||'সঠিক উত্তর সংরক্ষিত।',createdAt:Date.now()})});
+  if(!items.length)return toast('বৈধ MCQ পাওয়া যায়নি','error');
+  await putAll('mcqs',items);
+  await refreshState();
+  fillAdminSelects();
+  toast(`✅ ${items.length}টি MCQ সেভ`,'success');
+  document.getElementById('mcqText').value='';
+}
+function loadSample(n){const a=[];for(let i=1;i<=n;i++)a.push(`প্রশ্ন ${i}: গঠনমূলক মূল্যায়নের প্রধান লক্ষ্য কী? | শুধু নম্বর | শিখন ঘাটতি চিহ্নিত | ফলাফল তৈরি | সিলেবাস শেষ | 1 | পাঠ চলাকালীন অগ্রগতি যাচাই।`);document.getElementById('mcqText').value=a.join('\n')}
+
+/* ========== SAVE EXAM ========== */
+async function saveExam(){
+  const mcqText=document.getElementById('examMcqs').value.trim();
+  const mcqs=[];
+  if(mcqText){mcqText.split('\n').forEach(r=>{const p=r.split('|').map(x=>x.trim());if(p.length<6)return;const ci=Number(p[5]);if(isNaN(ci)||ci<0||ci>3)return;mcqs.push({id:'lm_'+Date.now()+'_'+Math.random().toString(36).slice(2,6),question:p[0],options:[p[1],p[2],p[3],p[4]],correctIndex:ci,explanation:p[6]||''})})}
+  const exam={id:'ex_'+Date.now(),title:document.getElementById('examName').value.trim()||'Live Mock Test',examId:document.getElementById('examTarget').value,type:document.getElementById('examType').value,daysDuration:Number(document.getElementById('examDays').value)||7,durationMinutes:Number(document.getElementById('examMins').value)||60,instructions:document.getElementById('examDesc').value.trim()||'নির্ধারিত সময়ে সম্পন্ন করুন।',createdAt:Date.now()};
+  if(mcqs.length)exam.mcqs=mcqs;
+  await putAll('exams',[exam]);
+  await refreshState();
+  toast(`✅ পরীক্ষা চালু ${mcqs.length?`(${mcqs.length}টি প্রশ্ন)`:''}`,'success');
+  document.getElementById('examName').value='';
+  document.getElementById('examDesc').value='';
+  document.getElementById('examMcqs').value='';
+}
+
+/* ========== SAVE CONTENT ========== */
+async function saveContent(){
+  const eid=document.getElementById('cntExam').value;
+  const sub=document.getElementById('cntSubject').value;
+  const type=document.getElementById('cntType').value;
+  const title=document.getElementById('cntTitle').value.trim();
+  const body=document.getElementById('cntBody').value.trim();
+  if(!sub)return toast('বিষয় নির্বাচন করুন','error');
+  if(!title)return toast('শিরোনাম দিন','error');
+  if(!body)return toast('বিষয়বস্তু দিন','error');
+  await putAll('contents',[{id:'cnt_'+Date.now(),examId:eid,subject:sub.trim(),type,title,body,createdAt:Date.now()}]);
+  await refreshState();
+  fillAdminSelects();
+  toast(`✅ "${title}" সেভ`,'success');
+  document.getElementById('cntTitle').value='';
+  document.getElementById('cntBody').value='';
+}
+async function deleteContent(id){if(!confirm('কনটেন্ট মুছবেন?'))return;await deleteFrom('contents',id);await refreshState();renderRecentContent();toast('🗑️ মুছে ফেলা হয়েছে','success')}
+
+/* ========== NOTIFICATION/LEADERBOARD/CHALLENGE ========== */
+async function sendNotificationAdmin(){const title=document.getElementById('notifTitle').value.trim(),body=document.getElementById('notifBody').value.trim(),type=document.getElementById('notifType').value;if(!title||!body)return toast('শিরোনাম ও বার্তা দিন','error');await putAll('notifications',[{id:'notif_'+Date.now(),title,body,type,createdAt:Date.now(),read:false}]);await refreshState();renderNotifList();document.getElementById('notifTitle').value='';document.getElementById('notifBody').value='';toast('📤 পাঠানো হয়েছে','success')}
+async function deleteNotification(id){await deleteFrom('notifications',id);await refreshState();renderNotifList();toast('🗑️ মুছে ফেলা হয়েছে','success')}
+async function addLeaderboardEntry(){const name=document.getElementById('lbName').value.trim(),score=Number(document.getElementById('lbScore').value),exam=document.getElementById('lbExam').value;if(!name)return toast('নাম দিন','error');if(isNaN(score)||score<0||score>100)return toast('স্কোর ০-১০০ দিন','error');await putAll('leaderboard',[{id:'lb_'+Date.now(),name,score,exam:state.examTypes.find(e=>e.id===exam)?.title||exam,timestamp:Date.now()}]);await refreshState();renderLbList();toast('✅ এন্ট্রি যোগ','success');document.getElementById('lbName').value='';document.getElementById('lbScore').value=''}
+async function deleteLbEntry(id){await deleteFrom('leaderboard',id);await refreshState();renderLbList();toast('🗑️ মুছে ফেলা হয়েছে','success')}
+async function seedLeaderboard(){if(!confirm('২০ জন স্যাম্পল ছাত্র যোগ করবেন?'))return;const e=SEED_NAMES.map((name,i)=>({id:'seed_'+Date.now()+'_'+i,name,score:Math.floor(45+Math.random()*55),exam:['WB TET','WBSSC','CTET','Police'][i%4],timestamp:Date.now()-Math.floor(Math.random()*7*86400000)}));await putAll('leaderboard',e);await refreshState();toast(`✅ ${e.length}টি এন্ট্রি যোগ`,'success');renderAdmin()}
+async function saveDailyChallenge(){const date=document.getElementById('dcDate').value,mcqId=document.getElementById('dcMcq').value,bonus=Number(document.getElementById('dcBonus').value)||50;if(!date)return toast('তারিখ দিন','error');if(!mcqId)return toast('MCQ বাছুন','error');const ex=state.dailyChallenges.find(c=>c.date===date);await putAll('dailyChallenges',[{id:ex?.id||'dc_'+Date.now(),date,mcqId,bonus,createdAt:Date.now()}]);await refreshState();renderDcList();toast(`✅ ${date} চ্যালেঞ্জ সেট`,'success')}
+async function deleteDc(id){await deleteFrom('dailyChallenges',id);await refreshState();renderDcList();toast('🗑️ মুছে ফেলা হয়েছে','success')}
+
+/* ========== EXPORT/IMPORT ========== */
+async function exportJson(){const data=await exportSnapshot();const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=`wbexammockhub_${Date.now()}.json`;a.click();URL.revokeObjectURL(a.href);toast('✅ JSON ডাউনলোড','success')}
+function exportCsv(){const rows=[['examId','subject','question','optA','optB','optC','optD','correct','explanation']];state.mcqs.forEach(m=>rows.push([m.examId,m.subject,m.question,...m.options,m.correctIndex,m.explanation]));const csv=rows.map(r=>r.map(v=>`"${String(v).replace(/"/g,'""')}"`).join(',')).join('\n');const blob=new Blob(['\ufeff'+csv],{type:'text/csv;charset=utf-8'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=`wb_mcqs_${Date.now()}.csv`;a.click();toast('✅ CSV ডাউনলোড','success')}
+async function wipeAllData(){if(!confirm('⚠️ সব ডেটা মুছে যাবে। আগে Export নিয়েছেন?'))return;if(!confirm('🔴 শেষবার — সব মুছবেন?'))return;const stores=['mcqs','exams','contents','submissions','categories','bookmarks','leaderboard','notifications','dailyChallenges','challengeCompletions','jobNotifications'];for(const s of stores)await clearAll(s);await seedCategories();await loadAdminData();toast('🗑️ সব মুছে ফেলা হয়েছে','success')}
+
+/* ========== RENDER ADMIN ========== */
+function renderAdmin(){
+  const s=state;
+  const statsBox=document.getElementById('statsBox');
+  const subsBox=document.getElementById('subsBox');
+  if(statsBox){
+    statsBox.innerHTML=`
+      <div class="grid-2" style="gap:10px">
+        <div style="padding:12px;border-radius:14px;background:rgba(var(--brand-rgb),.1);text-align:center"><div style="font-size:22px;font-weight:800;color:var(--brand)">${s.mcqs.length}</div><div class="muted" style="font-size:10px">MCQ</div></div>
+        <div style="padding:12px;border-radius:14px;background:rgba(16,185,129,.1);text-align:center"><div style="font-size:22px;font-weight:800;color:var(--success)">${s.exams.length}</div><div class="muted" style="font-size:10px">লাইভ</div></div>
+        <div style="padding:12px;border-radius:14px;background:rgba(245,158,11,.1);text-align:center"><div style="font-size:22px;font-weight:800;color:#b45309">${s.contents.length}</div><div class="muted" style="font-size:10px">কনটেন্ট</div></div>
+        <div style="padding:12px;border-radius:14px;background:rgba(139,92,246,.1);text-align:center"><div style="font-size:22px;font-weight:800;color:#8b5cf6">${s.jobNotifications.length}</div><div class="muted" style="font-size:10px">Jobs</div></div>
+      </div>
+      <div style="margin-top:12px;padding:10px;border-radius:10px;background:rgba(16,185,129,.08);text-align:center;font-size:11px;font-weight:700;color:var(--success)">☁️ ডেটা সেভ হয়েছে — "Push to Cloud" চাপুন যাতে সব ছাত্র পায়</div>
+    `;
+  }
+  if(subsBox){
+    subsBox.innerHTML=s.submissions.length?s.submissions.slice().reverse().map(sub=>`
+      <div style="padding:10px;border-radius:10px;background:rgba(148,163,184,.08);margin-bottom:8px;font-size:12px">
+        <div style="display:flex;justify-content:space-between;font-weight:800">
+          <span>${esc(sub.examTitle)}</span>
+          <span style="color:var(--brand)">${esc(sub.studentName)}</span>
+        </div>
+        <div style="margin-top:6px;color:var(--muted);white-space:pre-line">${esc(sub.answer)}</div>
+      </div>
+    `).join(''):'<p class="muted">কোনো উত্তর নেই।</p>';
+  }
+  renderGradientPicker();
+  renderCategoryLists();
+  renderNotifList();
+  renderLbList();
+  renderDcList();
+  renderRecentContent();
+  renderAdminJobList();
+  renderJobColorPicker();
+}
+
+/* ========== IMPORT DROP ========== */
+const dropZone=document.getElementById('dropZone');
+const importFile=document.getElementById('importFile');
+dropZone?.addEventListener('click',()=>importFile.click());
+importFile?.addEventListener('change',e=>handleAdminFile(e.target.files[0]));
+['dragover','dragenter'].forEach(ev=>dropZone?.addEventListener(ev,e=>{e.preventDefault();dropZone.classList.add('drag')}));
+['dragleave','drop'].forEach(ev=>dropZone?.addEventListener(ev,e=>{e.preventDefault();dropZone.classList.remove('drag')}));
+dropZone?.addEventListener('drop',e=>handleAdminFile(e.dataTransfer.files[0]));
+async function handleAdminFile(file){
+  if(!file)return;
+  if(!confirm('পুরোনো ডেটা মুছে ফেলবে। নিশ্চিত?'))return;
+  try{
+    const json=JSON.parse(await file.text());
+    if(!Array.isArray(json.mcqs))throw 0;
+    await bulkImport(json);
+    await refreshState();
+    fillAdminSelects();
     renderAdmin();
-  </script>
+    toast(`✅ ${json.mcqs.length} MCQ লোড`,'success');
+  }catch{toast('❌ ভুল ফাইল','error')}
+}
+
+/* ========== INIT ========== */
+initFirebase();
+</script>
 </body>
 </html>
