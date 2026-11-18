@@ -223,6 +223,18 @@ textarea{resize:vertical;min-height:80px}
 .content-item-header .title-text{flex:1;min-width:120px}
 .content-item-body{white-space:pre-line;opacity:.88;line-height:1.6}
 @media (prefers-reduced-motion:reduce){*{animation:none !important;transition:none !important}}
+
+/* Rich text notes created in the Admin panel */
+.content-item-body{white-space:normal;overflow-wrap:anywhere}
+.content-item-body p{margin:0 0 9px}
+.content-item-body h2{font-size:1.25em;margin:12px 0 7px;line-height:1.35}
+.content-item-body h3{font-size:1.1em;margin:10px 0 6px;line-height:1.35}
+.content-item-body ul,.content-item-body ol{padding-left:24px;margin:7px 0}
+.content-item-body li{margin:3px 0}
+.content-item-body blockquote{margin:9px 0;padding:8px 12px;border-left:3px solid var(--brand);background:rgba(var(--brand-rgb),.08);border-radius:0 8px 8px 0}
+.content-item-body a{color:var(--brand);text-decoration:underline;overflow-wrap:anywhere}
+.content-item-body mark{padding:0 .12em;border-radius:3px;color:inherit}
+.content-item-body img{max-width:100%;height:auto}
 </style>
 </head>
 <body>
@@ -411,11 +423,11 @@ function shareContentItemById(contentId){
   const exam=state.examTypes.find(e=>e.id===item.examId);
   const examTitle=exam?.title||item.examId;
   const typeInfo=getTypeInfo(item.type);
-  const bodyText=(item.body||'').slice(0,600);
-  const isUrl=item.body&&(item.body.startsWith('http://')||item.body.startsWith('https://'));
+  const bodyText=contentBodyText(item.body).slice(0,600);
+  const isUrl=contentUrl(item.body);
   let msg=`📚 *${APP_NAME}*\n━━━━━━━━━━━━━━━\n🎯 ${examTitle}\n📖 ${item.subject||''} — ${typeInfo.label}\n━━━━━━━━━━━━━━━\n\n📌 *${item.title}*\n\n`;
-  if(isUrl)msg+=`🔗 *লিংক:*\n${item.body}\n\n`;
-  else msg+=`${bodyText}${(item.body||'').length>600?'...':''}\n\n`;
+  if(isUrl)msg+=`🔗 *লিংক:*\n${isUrl}\n\n`;
+  else msg+=`${bodyText}${contentBodyText(item.body).length>600?'...':''}\n\n`;
   msg+=`━━━━━━━━━━━━━━━\n📱 ${APP_NAME}\n🎓 সেরা পরীক্ষা প্রস্তুতি অ্যাপ`;
   shareWhatsApp(msg);
 }
@@ -528,6 +540,56 @@ function renderHub(s){
   })()}`;
 }
 
+
+/* Render Admin-authored notes with a strict allowlist; never trust stored HTML. */
+function sanitizeStudentRichHtml(value=''){
+  const parsed=new DOMParser().parseFromString(`<div>${String(value||'')}</div>`,'text/html');
+  const root=parsed.body.firstElementChild;
+  const allowed=new Set(['P','BR','B','STRONG','I','EM','U','S','SPAN','MARK','H2','H3','UL','OL','LI','BLOCKQUOTE','A']);
+  const dangerous=new Set(['SCRIPT','STYLE','IFRAME','OBJECT','EMBED','SVG','MATH','FORM','INPUT','BUTTON','VIDEO','AUDIO']);
+  const safeColor=v=>{v=String(v||'').trim();return /^(#[0-9a-f]{3,8}|(?:rgb|rgba|hsl|hsla)\([0-9.% ,/+-]+\)|[a-z]{3,20})$/i.test(v)?v:''};
+  const clean=parent=>{
+    for(const node of Array.from(parent.childNodes)){
+      if(node.nodeType!==1)continue;
+      const tag=node.tagName;
+      if(dangerous.has(tag)){node.remove();continue;}
+      clean(node);
+      if(tag==='FONT'){
+        const span=parsed.createElement('span'),map={'1':'11px','2':'13px','3':'16px','4':'19px','5':'24px','6':'30px','7':'36px'};
+        if(map[node.getAttribute('size')])span.style.fontSize=map[node.getAttribute('size')];
+        const color=safeColor(node.getAttribute('color'));if(color)span.style.color=color;
+        while(node.firstChild)span.appendChild(node.firstChild);node.replaceWith(span);continue;
+      }
+      if(!allowed.has(tag)){const frag=parsed.createDocumentFragment();while(node.firstChild)frag.appendChild(node.firstChild);node.replaceWith(frag);continue;}
+      const href=tag==='A'?node.getAttribute('href'):null;
+      const color=safeColor(node.style?.color),bg=safeColor(node.style?.backgroundColor);
+      let size=(node.style?.fontSize||'').trim();
+      if(!/^(?:(?:[1-9]\d?|100)(?:px|pt|em|rem|%)|xx-small|x-small|small|medium|large|x-large|xx-large|smaller|larger)$/i.test(size))size='';
+      for(const attr of Array.from(node.attributes))node.removeAttribute(attr.name);
+      if(tag==='A'&&href){try{const url=new URL(href,location.href);if(['http:','https:','mailto:','tel:'].includes(url.protocol)){node.setAttribute('href',url.href);if(url.protocol==='http:'||url.protocol==='https:'){node.setAttribute('target','_blank');node.setAttribute('rel','noopener noreferrer')}}}catch{}}
+      if(tag==='SPAN'){if(color)node.style.color=color;if(bg)node.style.backgroundColor=bg;if(size)node.style.fontSize=size;}
+      if(tag==='MARK'&&bg)node.style.backgroundColor=bg;
+    }
+  };
+  clean(root);return root.innerHTML;
+}
+function renderRichContent(value=''){
+  const raw=String(value||'');
+  const hasMarkup=/<(?:p|br|b|strong|i|em|u|s|span|mark|h[23]|ul|ol|li|blockquote|a|font)(?:\s|>|\/)/i.test(raw);
+  return hasMarkup?sanitizeStudentRichHtml(raw):esc(raw).replace(/\r\n|\r|\n/g,'<br>');
+}
+function contentBodyText(value=''){
+  const box=document.createElement('div');box.innerHTML=renderRichContent(value);
+  return String(box.innerText||box.textContent||'').trim();
+}
+function contentUrl(value=''){
+  const raw=String(value||'').trim();if(!/^https?:\/\//i.test(raw))return '';
+  try{const url=new URL(raw);return ['http:','https:'].includes(url.protocol)?url.href:''}catch{return ''}
+}
+function contentLinkButton(value=''){
+  const url=contentUrl(value);return url?`<a href="${esc(url)}" target="_blank" rel="noopener noreferrer" style="display:inline-block;margin-top:10px;padding:9px 16px;border-radius:10px;background:var(--brand);color:white;font-size:12px;font-weight:800;text-decoration:none">🔗 লিংক খুলুন</a>`:'';
+}
+
 function renderContentType(s){
   const exam=s.examTypes.find(e=>e.id===s.ui.examId)||s.examTypes[0];if(!exam)return'';
   const allowedTypes=getContentTypesForSubject(exam.id,s.ui.subject);
@@ -540,7 +602,7 @@ function renderContentType(s){
   const fs=s.ui.fontSize;
   return `<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px"><button class="btn btn-sm btn-ghost" onclick="backFromContentType()">← Back</button><div style="text-align:center;flex:1"><div style="font-weight:800;font-size:15px">${typeInfo.icon} ${esc(typeInfo.label)}</div><div class="muted" style="font-size:10px">${esc(exam.title)} • ${esc(s.ui.subject)}</div></div><div style="display:flex;gap:4px"><button class="btn btn-sm btn-ghost" onclick="fontSizeChange(-1)">A-</button><button class="btn btn-sm btn-ghost" onclick="fontSizeChange(1)">A+</button></div></div>
   <div class="card" style="margin-bottom:14px;background:linear-gradient(135deg,${typeInfo.color},${typeInfo.color}dd);color:white;border:none"><div style="display:flex;align-items:center;gap:14px"><div style="font-size:42px">${typeInfo.icon}</div><div><div style="font-size:12px;opacity:.9;font-weight:600">মোট কনটেন্ট</div><div style="font-size:28px;font-weight:900;margin-top:2px">${items.length}</div><div style="font-size:11px;opacity:.85">${esc(s.ui.subject)}-এর ${esc(typeInfo.label)}</div></div></div></div>
-  ${items.length?items.map(it=>`<div class="content-item-box"><div class="content-item-header"><span>${typeInfo.icon}</span><span class="title-text">${esc(it.title)}</span><button class="share-btn" onclick="shareContentItemById('${it.id}')">📤 Share</button></div><div class="content-item-body" style="font-size:${fs}px">${esc(it.body)}</div>${(it.body||'').startsWith('http')?`<a href="${it.body}" target="_blank" rel="noopener" style="display:inline-block;margin-top:10px;padding:9px 16px;border-radius:10px;background:var(--brand);color:white;font-size:12px;font-weight:800;text-decoration:none">🔗 লিংক খুলুন</a>`:''}</div>`).join(''):`<div class="empty-state" style="padding:48px 20px"><div class="emoji">${typeInfo.icon}</div><div class="title">এই বিষয়ে ${esc(typeInfo.label.toLowerCase())} শীঘ্রই আসবে</div><div class="sub">Admin থেকে সিঙ্ক হলে দেখাবে</div></div>`}`;
+  ${items.length?items.map(it=>`<div class="content-item-box"><div class="content-item-header"><span>${typeInfo.icon}</span><span class="title-text">${esc(it.title)}</span><button class="share-btn" onclick="shareContentItemById('${it.id}')">📤 Share</button></div><div class="content-item-body" style="font-size:${fs}px">${renderRichContent(it.body)}</div>${contentLinkButton(it.body)}</div>`).join(''):`<div class="empty-state" style="padding:48px 20px"><div class="emoji">${typeInfo.icon}</div><div class="title">এই বিষয়ে ${esc(typeInfo.label.toLowerCase())} শীঘ্রই আসবে</div><div class="sub">Admin থেকে সিঙ্ক হলে দেখাবে</div></div>`}`;
 }
 
 function renderLive(s){if(!s.exams.length)return`<h2>লাইভ পরীক্ষা</h2><p class="muted" style="margin-bottom:14px">MCQ ও ব্রড টাইপ</p><div class="empty-state"><div class="emoji">📝</div><div class="title">শীঘ্রই নতুন পরীক্ষা আসবে</div><div class="sub">Admin থেকে সিঙ্ক হলে আসবে</div></div>`;return `<h2>লাইভ পরীক্ষা</h2><p class="muted" style="margin-bottom:14px">MCQ ও ব্রড টাইপ</p>${s.exams.map(ex=>{const qCount=getLiveExamQuestions(ex.id).length;return `<div class="card" style="margin-bottom:12px"><div style="display:flex;justify-content:space-between;font-size:11px;font-weight:800;margin-bottom:8px"><span style="padding:5px 11px;border-radius:99px;background:${ex.type==='MCQ'?'rgba(var(--brand-rgb),.15)':'rgba(245,158,11,.15)'};color:${ex.type==='MCQ'?'var(--brand)':'#b45309'}">${ex.type==='MCQ'?'🎯 MCQ':'✍️ ব্রড'}</span><span style="color:var(--danger)">⏳ ${ex.daysDuration}দি • ${ex.durationMinutes}মি</span></div><h3 style="margin-bottom:6px">${esc(ex.title)}</h3><p class="muted" style="margin-bottom:10px">${esc(ex.instructions||'')}</p>${ex.type==='BROAD'?`<textarea id="broad_${ex.id}" placeholder="এখানে আপনার উত্তর লিখুন..." style="margin-bottom:8px"></textarea><button class="btn btn-success" style="width:100%" onclick="submitBroad('${ex.id}','${esc(ex.title).replace(/'/g,"\\'")}')">✓ উত্তর জমা দিন</button>`:`<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;padding:8px 12px;border-radius:10px;background:rgba(var(--brand-rgb),.08)"><span style="font-size:12px;font-weight:700">📊 মোট প্রশ্ন: <strong style="color:var(--brand)">${qCount}</strong></span><span style="font-size:11px;color:var(--muted)">${qCount>0?'প্রস্তুত ✅':'প্রশ্ন নেই ⚠️'}</span></div><button class="btn btn-primary" style="width:100%" onclick="startLiveExam('${ex.id}')" ${qCount===0?'disabled style="opacity:.5"':''}>পরীক্ষা শুরু করুন →</button>`}</div>`}).join('')}`}
