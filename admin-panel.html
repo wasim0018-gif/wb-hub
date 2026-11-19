@@ -75,6 +75,8 @@ label{font-size:11px;font-weight:700;color:var(--muted);display:block;margin:10p
 .rich-toolbar .tool-color{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:700;color:var(--muted)}
 .rich-toolbar input[type=color]{width:28px;height:28px;padding:2px;border:1px solid var(--border);border-radius:7px;background:var(--card);cursor:pointer}
 .content-editor{min-height:180px;max-height:520px;overflow:auto;padding:14px;border:1px solid var(--border);border-top:0;border-radius:0 0 12px 12px;background:var(--bg);color:var(--text);font-size:15px;line-height:1.7;outline:none;white-space:normal;overflow-wrap:anywhere}
+.content-editor.compact-rich-editor{min-height:100px;max-height:360px}
+.content-editor[contenteditable=true] p{margin:0 0 8px}
 .content-editor:focus{border-color:var(--brand);box-shadow:0 0 0 2px rgba(var(--brand-rgb),.1)}
 .content-editor:empty:before{content:attr(data-placeholder);color:var(--muted);pointer-events:none}
 .content-editor h2,.content-editor h3{margin:10px 0 6px}.content-editor ul,.content-editor ol{padding-left:24px;margin:6px 0}.content-editor blockquote{margin:8px 0;padding:7px 12px;border-left:3px solid var(--brand);background:rgba(var(--brand-rgb),.08)}
@@ -148,8 +150,8 @@ label{font-size:11px;font-weight:700;color:var(--muted);display:block;margin:10p
       </div>
       <label>সময় (মিনিট)</label>
       <input id="examMins" type="number" value="60" min="5" />
-      <label>নির্দেশনা</label>
-      <textarea id="examDesc" rows="3"></textarea>
+      <label>নির্দেশনা — ফরম্যাটিংসহ</label>
+      <div id="examDescRichMount"></div><textarea id="examDesc" rows="3" style="display:none" aria-hidden="true"></textarea>
       <label>🎯 MCQ প্রশ্ন (ঐচ্ছিক)</label>
       <textarea id="examMcqs" rows="5" placeholder="প্রশ্ন | A | B | C | D | সঠিক(0-3) | ব্যাখ্যা" style="font-family:monospace;font-size:11px"></textarea>
       <div class="btn-row">
@@ -180,6 +182,10 @@ label{font-size:11px;font-weight:700;color:var(--muted);display:block;margin:10p
         <select aria-label="লেখার আকার" title="লেখার আকার" onmousedown="saveContentSelection()" onchange="richFontSize(this.value);this.selectedIndex=0">
           <option value="">আকার</option><option value="2">ছোট</option><option value="3">সাধারণ</option><option value="5">বড়</option>
         </select>
+        <select aria-label="লাইনের ব্যবধান" title="লাইনের ব্যবধান" onmousedown="saveContentSelection()" onchange="richLineSpacing('cntBodyEditor',this.value);this.selectedIndex=0"><option value="">লাইন গ্যাপ</option><option value="1.2">কম</option><option value="1.5">মাঝারি</option><option value="1.8">বেশি</option><option value="2">দ্বিগুণ</option></select>
+        <button type="button" title="বামে সাজান" onmousedown="event.preventDefault()" onclick="richCommand('justifyLeft')">≡ বাম</button>
+        <button type="button" title="মাঝে সাজান" onmousedown="event.preventDefault()" onclick="richCommand('justifyCenter')">মাঝে</button>
+        <button type="button" title="ডানে সাজান" onmousedown="event.preventDefault()" onclick="richCommand('justifyRight')">ডান ≡</button>
         <button type="button" title="শিরোনাম" onmousedown="event.preventDefault()" onclick="richCommand('formatBlock','h2')">শিরোনাম</button>
         <button type="button" title="হাইলাইট" onmousedown="event.preventDefault()" onclick="richHighlight()"><span style="background:#fff176;color:#111;padding:1px 4px;border-radius:3px">হাইলাইট</span></button>
         <label class="tool-color" title="লেখার রঙ">রঙ <input type="color" value="#1f2937" onmousedown="saveContentSelection()" onchange="richTextColor(this.value)"></label>
@@ -232,8 +238,8 @@ label{font-size:11px;font-weight:700;color:var(--muted);display:block;margin:10p
         <div><label>আইকন</label><input id="catIcon" placeholder="🏛️" maxlength="2" style="text-align:center;font-size:20px" /></div>
         <div><label>ট্যাগ</label><input id="catTag" placeholder="WBPSC" maxlength="8" /></div>
       </div>
-      <label>সংক্ষিপ্ত বিবরণ</label>
-      <input id="catDesc" placeholder="ক্লার্কশিপ" />
+      <label>সংক্ষিপ্ত বিবরণ — ফরম্যাটিংসহ</label>
+      <div id="catDescRichMount"></div><textarea id="catDesc" rows="3" style="display:none" aria-hidden="true"></textarea>
       <label>রঙ</label>
       <div id="gradPicker" style="margin-bottom:8px"></div>
       <label style="margin-top:6px">📋 Content Types (এই পরীক্ষায় কোন ধরনের কনটেন্ট)</label>
@@ -281,8 +287,8 @@ label{font-size:11px;font-weight:700;color:var(--muted);display:block;margin:10p
       <div id="notifEditBanner"></div>
       <label>শিরোনাম</label>
       <input id="notifTitle" placeholder="নতুন পরীক্ষা এসেছে!" />
-      <label>বার্তা</label>
-      <textarea id="notifBody" rows="3"></textarea>
+      <label>বার্তা — ফরম্যাটিংসহ</label>
+      <div id="notifBodyRichMount"></div><textarea id="notifBody" rows="3" style="display:none" aria-hidden="true"></textarea>
       <label>ধরন</label>
       <select id="notifType"><option value="info">ℹ️ সাধারণ</option><option value="exam">📝 পরীক্ষা</option><option value="update">🔄 আপডেট</option><option value="alert">⚠️ জরুরি</option></select>
       <div class="btn-row">
@@ -339,8 +345,8 @@ label{font-size:11px;font-weight:700;color:var(--muted);display:block;margin:10p
       <select id="jobType"><option value="link">🔗 লিংক</option><option value="pdf">📄 PDF</option><option value="text">📝 টেক্সট</option></select>
       <label>URL / PDF লিংক</label>
       <input id="jobUrl" placeholder="https://..." />
-      <label>বিবরণ</label>
-      <textarea id="jobDesc" rows="3"></textarea>
+      <label>বিবরণ / নোট — ফরম্যাটিংসহ</label>
+      <div id="jobDescRichMount"></div><textarea id="jobDesc" rows="3" style="display:none" aria-hidden="true"></textarea>
       <label>শেষ তারিখ</label>
       <input id="jobDeadline" type="date" />
       <label>রঙ</label>
@@ -631,10 +637,10 @@ function loadSample(n){const a=[];for(let i=1;i<=n;i++)a.push(`প্রশ্�
 
 /* ===== EXAM ===== */
 function renderExamList(){const el=document.getElementById('examList');if(!el)return;document.getElementById('examListCount').textContent=state.exams.length;if(!state.exams.length){el.innerHTML='<p class="muted" style="font-size:11px">কোনো পরীক্ষা নেই</p>';return}el.innerHTML=state.exams.map(ex=>`<div class="exam-card-mini" style="${state.ui.editingExamId===ex.id?'border-color:var(--warning);background:rgba(245,158,11,.08)':''}"><div style="font-weight:800;font-size:12px;margin-bottom:4px">${esc(ex.title)}</div><div class="muted" style="font-size:10px;margin-bottom:6px">${ex.type} • ${ex.daysDuration}দি • ${ex.durationMinutes}মি • ${ex.mcqs?.length||0} প্রশ্ন</div><div style="display:flex;gap:4px"><button class="btn btn-sm btn-warning btn-icon" onclick="editExam('${ex.id}')">✏️</button><button class="btn btn-sm btn-danger btn-icon" onclick="deleteExam('${ex.id}')">×</button></div></div>`).join('');renderEditBanners()}
-function editExam(id){const ex=state.exams.find(x=>x.id===id);if(!ex)return;state.ui.editingExamId=id;document.getElementById('examName').value=ex.title||'';document.getElementById('examTarget').value=ex.examId||'';document.getElementById('examType').value=ex.type||'MCQ';document.getElementById('examDays').value=ex.daysDuration||7;document.getElementById('examMins').value=ex.durationMinutes||60;document.getElementById('examDesc').value=ex.instructions||'';document.getElementById('examMcqs').value=(ex.mcqs||[]).map(m=>`${m.question} | ${m.options[0]} | ${m.options[1]} | ${m.options[2]} | ${m.options[3]} | ${m.correctIndex} | ${m.explanation||''}`).join('\n');const btn=document.getElementById('examSaveBtn');if(btn)btn.textContent='✏️ আপডেট';const cb=document.getElementById('examCancelBtn');if(cb)cb.style.display='block';renderExamList();scrollToId('examName');toast('✏️ এডিট')}
-function cancelEditExam(){state.ui.editingExamId=null;['examName','examDesc','examMcqs'].forEach(id=>{const el=document.getElementById(id);if(el)el.value=''});const btn=document.getElementById('examSaveBtn');if(btn)btn.textContent='▶️ চালু';const cb=document.getElementById('examCancelBtn');if(cb)cb.style.display='none';renderExamList();toast('❌ বাতিল')}
+function editExam(id){const ex=state.exams.find(x=>x.id===id);if(!ex)return;state.ui.editingExamId=id;document.getElementById('examName').value=ex.title||'';document.getElementById('examTarget').value=ex.examId||'';document.getElementById('examType').value=ex.type||'MCQ';document.getElementById('examDays').value=ex.daysDuration||7;document.getElementById('examMins').value=ex.durationMinutes||60;setRichFieldValue('examDesc',ex.instructions||'');document.getElementById('examMcqs').value=(ex.mcqs||[]).map(m=>`${m.question} | ${m.options[0]} | ${m.options[1]} | ${m.options[2]} | ${m.options[3]} | ${m.correctIndex} | ${m.explanation||''}`).join('\n');const btn=document.getElementById('examSaveBtn');if(btn)btn.textContent='✏️ আপডেট';const cb=document.getElementById('examCancelBtn');if(cb)cb.style.display='block';renderExamList();scrollToId('examName');toast('✏️ এডিট')}
+function cancelEditExam(){state.ui.editingExamId=null;['examName','examDesc','examMcqs'].forEach(id=>{const el=document.getElementById(id);if(el)el.value=''});clearRichField('examDesc');const btn=document.getElementById('examSaveBtn');if(btn)btn.textContent='▶️ চালু';const cb=document.getElementById('examCancelBtn');if(cb)cb.style.display='none';renderExamList();toast('❌ বাতিল')}
 async function deleteExam(id){if(!confirm('মুছবেন?'))return;await deleteFrom('exams',id);if(state.ui.editingExamId===id)cancelEditExam();await refreshState();fillAdminSelects();toast('🗑️ মুছে ফেলা','success')}
-async function saveExam(){const mcqText=document.getElementById('examMcqs').value.trim();const mcqs=[];if(mcqText){mcqText.split('\n').forEach(r=>{const p=r.split('|').map(x=>x.trim());if(p.length<6)return;const ci=Number(p[5]);if(isNaN(ci)||ci<0||ci>3)return;mcqs.push({id:'lm_'+Date.now()+'_'+Math.random().toString(36).slice(2,6),question:p[0],options:[p[1],p[2],p[3],p[4]],correctIndex:ci,explanation:p[6]||''})})}const base={title:document.getElementById('examName').value.trim()||'Live Mock Test',examId:document.getElementById('examTarget').value,type:document.getElementById('examType').value,daysDuration:Number(document.getElementById('examDays').value)||7,durationMinutes:Number(document.getElementById('examMins').value)||60,instructions:document.getElementById('examDesc').value.trim()||'নির্ধারিত সময়ে সম্পন্ন করুন।'};if(mcqs.length)base.mcqs=mcqs;if(state.ui.editingExamId){const ex=state.exams.find(e=>e.id===state.ui.editingExamId);if(!ex)return toast('পাওয়া যায়নি','error');await putAll('exams',[{...ex,...base,updatedAt:Date.now()}]);state.ui.editingExamId=null;['examName','examDesc','examMcqs'].forEach(id=>{const el=document.getElementById(id);if(el)el.value=''});const btn=document.getElementById('examSaveBtn');if(btn)btn.textContent='▶️ চালু';const cb=document.getElementById('examCancelBtn');if(cb)cb.style.display='none';await refreshState();fillAdminSelects();toast('✅ আপডেট','success');return}await putAll('exams',[{id:'ex_'+Date.now(),...base,createdAt:Date.now()}]);await refreshState();fillAdminSelects();toast(`✅ চালু`,'success');['examName','examDesc','examMcqs'].forEach(id=>{const el=document.getElementById(id);if(el)el.value=''})}
+async function saveExam(){const mcqText=document.getElementById('examMcqs').value.trim();const mcqs=[];if(mcqText){mcqText.split('\n').forEach(r=>{const p=r.split('|').map(x=>x.trim());if(p.length<6)return;const ci=Number(p[5]);if(isNaN(ci)||ci<0||ci>3)return;mcqs.push({id:'lm_'+Date.now()+'_'+Math.random().toString(36).slice(2,6),question:p[0],options:[p[1],p[2],p[3],p[4]],correctIndex:ci,explanation:p[6]||''})})}const base={title:document.getElementById('examName').value.trim()||'Live Mock Test',examId:document.getElementById('examTarget').value,type:document.getElementById('examType').value,daysDuration:Number(document.getElementById('examDays').value)||7,durationMinutes:Number(document.getElementById('examMins').value)||60,instructions:getRichFieldValue('examDesc').trim()||'নির্ধারিত সময়ে সম্পন্ন করুন।'};if(mcqs.length)base.mcqs=mcqs;if(state.ui.editingExamId){const ex=state.exams.find(e=>e.id===state.ui.editingExamId);if(!ex)return toast('পাওয়া যায়নি','error');await putAll('exams',[{...ex,...base,updatedAt:Date.now()}]);state.ui.editingExamId=null;['examName','examDesc','examMcqs'].forEach(id=>{const el=document.getElementById(id);if(el)el.value=''});clearRichField('examDesc');const btn=document.getElementById('examSaveBtn');if(btn)btn.textContent='▶️ চালু';const cb=document.getElementById('examCancelBtn');if(cb)cb.style.display='none';await refreshState();fillAdminSelects();toast('✅ আপডেট','success');return}await putAll('exams',[{id:'ex_'+Date.now(),...base,createdAt:Date.now()}]);await refreshState();fillAdminSelects();toast(`✅ চালু`,'success');['examName','examDesc','examMcqs'].forEach(id=>{const el=document.getElementById(id);if(el)el.value=''});clearRichField('examDesc')}
 
 /* ===== CONTENT ===== */
 function renderContentList(){const el=document.getElementById('contentList');if(!el)return;const search=(document.getElementById('cntSearch')?.value||'').toLowerCase();let items=[...state.contents].sort((a,b)=>(b.createdAt||0)-(a.createdAt||0));if(search)items=items.filter(c=>(c.title||'').toLowerCase().includes(search)||(c.subject||'').toLowerCase().includes(search));document.getElementById('cntListCount').textContent=items.length;if(!items.length){el.innerHTML='<p class="muted" style="font-size:11px">কোনো কনটেন্ট নেই</p>';return}el.innerHTML=items.map(c=>{const ex=state.examTypes.find(e=>e.id===c.examId);const ti=state.contentTypes.find(t=>t.key===c.type)||{icon:'📄',label:c.type};const allowed=getContentTypesForSubject(c.examId,c.subject);const disabled=!allowed.includes(c.type);return `<div class="cat-item" style="${state.ui.editingContentId===c.id?'border-color:var(--warning);background:rgba(245,158,11,.08)':disabled?'opacity:.6':''}"><div class="cat-icon" style="background:${ti.color||'var(--brand)'};color:white;font-size:16px;width:36px;height:36px">${ti.icon}</div><div style="flex:1;min-width:0"><div style="font-weight:800;font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(c.title)}${disabled?' <span style="color:var(--warning);font-size:9px">⚠️</span>':''}</div><div class="muted" style="font-size:10px">${esc(ex?.title||c.examId)} • ${esc(c.subject)} • ${esc(ti.label)}</div></div><button class="btn btn-sm btn-warning btn-icon" onclick="editContent('${c.id}')">✏️</button><button class="btn btn-sm btn-danger btn-icon" onclick="deleteContent('${c.id}')">×</button></div>`}).join('');renderEditBanners()}
@@ -668,11 +674,14 @@ function sanitizeRichHtml(html=''){
       const color=safeColor(node.style?.color),bg=safeColor(node.style?.backgroundColor);
       let size=(node.style?.fontSize||'').trim();
       if(!/^(?:(?:[1-9]\d?|100)(?:px|pt|em|rem|%)|xx-small|x-small|small|medium|large|x-large|xx-large|smaller|larger)$/i.test(size))size='';
+      const lh=Number(node.style?.lineHeight),lineHeight=Number.isFinite(lh)&&lh>=1&&lh<=3?String(lh):'';
+      const textAlign=['left','center','right','justify'].includes(node.style?.textAlign)?node.style.textAlign:'';
       for(const attr of Array.from(node.attributes))node.removeAttribute(attr.name);
       if(tag==='A'&&href){try{const u=new URL(href,location.href);if(['http:','https:','mailto:','tel:'].includes(u.protocol)){node.setAttribute('href',u.href);if(u.protocol.startsWith('http')){node.setAttribute('target','_blank');node.setAttribute('rel','noopener noreferrer')}}}catch{}}
       if(tag==='SPAN'){
         if(color)node.style.color=color;if(bg)node.style.backgroundColor=bg;if(size)node.style.fontSize=size;
       }
+      if(['P','H2','H3','LI','BLOCKQUOTE'].includes(tag)){if(lineHeight)node.style.lineHeight=lineHeight;if(textAlign)node.style.textAlign=textAlign}
       if(tag==='MARK'&&bg)node.style.backgroundColor=bg;
     }
   };
@@ -682,30 +691,45 @@ function sanitizeRichHtml(html=''){
 let savedContentRange=null;
 function saveContentSelection(){const editor=document.getElementById('cntBodyEditor'),sel=window.getSelection();if(editor&&sel&&sel.rangeCount&&editor.contains(sel.anchorNode))savedContentRange=sel.getRangeAt(0).cloneRange()}
 function restoreContentSelection(){const editor=document.getElementById('cntBodyEditor'),sel=window.getSelection();if(!editor||!sel)return;editor.focus();if(savedContentRange&&editor.contains(savedContentRange.commonAncestorContainer)){sel.removeAllRanges();sel.addRange(savedContentRange)}}
-function richCommand(command,value=null){restoreContentSelection();document.execCommand('styleWithCSS',false,true);document.execCommand(command,false,value);syncContentEditor();saveContentSelection()}
+function richCommand(command,value=null){if(['justifyLeft','justifyCenter','justifyRight'].includes(command)){richCommandFor('cntBodyEditor',command,value);return}restoreContentSelection();document.execCommand('styleWithCSS',false,true);document.execCommand(command,false,value);syncContentEditor();saveContentSelection()}
 function richFontSize(value){if(!value)return;richCommand('fontSize',value)}
 function richHighlight(){restoreContentSelection();document.execCommand('styleWithCSS',false,true);document.execCommand('hiliteColor',false,'#fff176');syncContentEditor();saveContentSelection()}
 function richTextColor(value){if(!value)return;richCommand('foreColor',value)}
 function richLink(){restoreContentSelection();const url=prompt('লিংক URL দিন (https://...)');if(!url)return;let safe;try{safe=new URL(url,location.href);if(!['http:','https:','mailto:','tel:'].includes(safe.protocol))throw new Error('unsafe')}catch{return toast('সঠিক লিংক দিন','error')}document.execCommand('createLink',false,safe.href);syncContentEditor();saveContentSelection()}
-function syncContentEditor(){const editor=document.getElementById('cntBodyEditor'),hidden=document.getElementById('cntBody');if(editor&&hidden)hidden.value=editor.innerHTML}
-function setContentEditor(value=''){
-  const editor=document.getElementById('cntBodyEditor'),hidden=document.getElementById('cntBody');if(!editor||!hidden)return;
+function syncContentEditor(editorId='cntBodyEditor'){const editor=document.getElementById(editorId),hidden=document.getElementById(editorId.replace(/Editor$/,''));if(editor&&hidden)hidden.value=editor.innerHTML}
+function setContentEditor(value='',editorId='cntBodyEditor'){
+  const editor=document.getElementById(editorId),hidden=document.getElementById(editorId.replace(/Editor$/,''));if(!editor||!hidden)return;
   const text=String(value||'');
   const looksRich=/<(?:p|br|b|strong|i|em|u|s|span|mark|h[23]|ul|ol|li|blockquote|a|font)(?:\s|>|\/)/i.test(text);
   editor.innerHTML=looksRich?sanitizeRichHtml(text):plainTextToRichHtml(text);hidden.value=editor.innerHTML;savedContentRange=null;
 }
-function clearContentEditor(){setContentEditor('')}
+function clearContentEditor(editorId='cntBodyEditor'){setContentEditor('',editorId)}
+const richEditorRanges=new Map();
+function makeRichToolbar(id){return `<div class="rich-toolbar" role="toolbar" aria-label="লেখা সাজানোর টুলবার" onmousedown="saveRichSelection('${id}')"><button type="button" class="tool-bold" title="Bold" onmousedown="event.preventDefault()" onclick="richCommandFor('${id}','bold')"><b>B</b></button><button type="button" class="tool-italic" title="Italic" onmousedown="event.preventDefault()" onclick="richCommandFor('${id}','italic')"><i>I</i></button><button type="button" class="tool-underline" title="Underline" onmousedown="event.preventDefault()" onclick="richCommandFor('${id}','underline')"><u>U</u></button><select title="লেখার আকার" onmousedown="saveRichSelection('${id}')" onchange="richCommandFor('${id}','fontSize',this.value);this.selectedIndex=0"><option value="">আকার</option><option value="2">ছোট</option><option value="3">সাধারণ</option><option value="5">বড়</option></select><select title="লাইনের ব্যবধান" onmousedown="saveRichSelection('${id}')" onchange="richLineSpacing('${id}',this.value);this.selectedIndex=0"><option value="">লাইন গ্যাপ</option><option value="1.2">কম</option><option value="1.5">মাঝারি</option><option value="1.8">বেশি</option><option value="2">দ্বিগুণ</option></select><button type="button" title="হাইলাইট" onmousedown="event.preventDefault()" onclick="richHighlightFor('${id}')">🟨</button><label class="tool-color">রঙ <input type="color" value="#1f2937" onmousedown="saveRichSelection('${id}')" onchange="richTextColorFor('${id}',this.value)"></label><button type="button" title="শিরোনাম" onmousedown="event.preventDefault()" onclick="richCommandFor('${id}','formatBlock','h2')">শিরোনাম</button><button type="button" title="বুলেট তালিকা" onmousedown="event.preventDefault()" onclick="richCommandFor('${id}','insertUnorderedList')">• তালিকা</button><button type="button" title="নম্বর তালিকা" onmousedown="event.preventDefault()" onclick="richCommandFor('${id}','insertOrderedList')">1. তালিকা</button><button type="button" title="বামে সাজান" onmousedown="event.preventDefault()" onclick="richCommandFor('${id}','justifyLeft')">≡</button><button type="button" title="মাঝে সাজান" onmousedown="event.preventDefault()" onclick="richCommandFor('${id}','justifyCenter')">↔</button><button type="button" title="ডানে সাজান" onmousedown="event.preventDefault()" onclick="richCommandFor('${id}','justifyRight')">≡</button><button type="button" title="ফরম্যাট মুছুন" onmousedown="event.preventDefault()" onclick="richCommandFor('${id}','removeFormat')">পরিষ্কার</button></div>`}
+function initRichField(textareaId){const hidden=document.getElementById(textareaId),mount=document.getElementById(textareaId+'RichMount');if(!hidden||!mount)return;hidden.style.display='none';const editorId=textareaId+'Editor';mount.innerHTML=makeRichToolbar(editorId)+`<div id="${editorId}" class="content-editor compact-rich-editor" contenteditable="true" role="textbox" aria-multiline="true" data-placeholder="এখানে লেখা লিখুন; লেখা সিলেক্ট করে ফরম্যাটিং দিন..." oninput="syncContentEditor('${editorId}')" onfocus="saveRichSelection('${editorId}')"></div><p class="rich-editor-hint">লেখা সিলেক্ট করে Bold, আকার, লাইন গ্যাপ, রঙ, হাইলাইট, তালিকা বা alignment বেছে নিন।</p>`;setContentEditor(hidden.value||'',editorId)}
+function initRichTextFields(){['examDesc','notifBody','jobDesc','catDesc'].forEach(initRichField)}
+function saveRichSelection(id){const editor=document.getElementById(id),sel=window.getSelection();if(editor&&sel&&sel.rangeCount&&editor.contains(sel.anchorNode))richEditorRanges.set(id,sel.getRangeAt(0).cloneRange())}
+function restoreRichSelection(id){const editor=document.getElementById(id),sel=window.getSelection();if(!editor||!sel)return;editor.focus();const range=richEditorRanges.get(id);if(range&&editor.contains(range.commonAncestorContainer)){sel.removeAllRanges();sel.addRange(range)}}
+function richCommandFor(id,command,value=null){restoreRichSelection(id);const alignMap={justifyLeft:'left',justifyCenter:'center',justifyRight:'right'};if(alignMap[command]){const editor=document.getElementById(id),sel=window.getSelection();let anchor=sel?.anchorNode,node=anchor?.nodeType===1?anchor:anchor?.parentElement,block=node?.closest('p,h2,h3,li,blockquote');if(!block||!editor?.contains(block)){document.execCommand('formatBlock',false,'p');anchor=window.getSelection()?.anchorNode;node=anchor?.nodeType===1?anchor:anchor?.parentElement;block=node?.closest('p,h2,h3,li,blockquote')}if(block&&editor.contains(block))block.style.textAlign=alignMap[command];syncContentEditor(id);saveRichSelection(id);return}document.execCommand('styleWithCSS',false,true);document.execCommand(command,false,value);syncContentEditor(id);saveRichSelection(id)}
+function richHighlightFor(id){restoreRichSelection(id);document.execCommand('styleWithCSS',false,true);document.execCommand('hiliteColor',false,'#fff176');syncContentEditor(id);saveRichSelection(id)}
+function richTextColorFor(id,value){if(value)richCommandFor(id,'foreColor',value)}
+function richLineSpacing(id,value){if(!value)return;restoreRichSelection(id);const editor=document.getElementById(id),sel=window.getSelection();if(!editor)return;let node=sel?.anchorNode?.nodeType===1?sel.anchorNode:sel?.anchorNode?.parentElement;let block=node?.closest('p,h2,h3,li,blockquote');if(!block||!editor.contains(block)){document.execCommand('formatBlock',false,'p');const next=window.getSelection()?.anchorNode;block=(next?.nodeType===1?next:next?.parentElement)?.closest('p,h2,h3,li,blockquote')}if(block&&editor.contains(block))block.style.lineHeight=String(Math.max(1,Math.min(3,Number(value)||1.5)));syncContentEditor(id);saveRichSelection(id)}
+function getRichFieldValue(textareaId){const ed=document.getElementById(textareaId+'Editor');return ed?sanitizeRichHtml(ed.innerHTML):String(document.getElementById(textareaId)?.value||'')}
+function setRichFieldValue(textareaId,value=''){setContentEditor(value,textareaId+'Editor')}
+function clearRichField(textareaId){const hidden=document.getElementById(textareaId);if(hidden)hidden.value='';clearContentEditor(textareaId+'Editor')}
+function richHtmlToPlainText(value=''){const div=document.createElement('div');div.innerHTML=String(value||'').replace(/<br\s*\/?>(?!$)/gi,'<br>');return String(div.innerText||div.textContent||'').trim()}
+
 function editContent(id){const c=state.contents.find(x=>x.id===id);if(!c)return;state.ui.editingContentId=id;document.getElementById('cntExam').value=c.examId||'';updateCntSubjects();document.getElementById('cntSubject').value=c.subject||'';updateCntTypes();document.getElementById('cntType').value=c.type||'';document.getElementById('cntTitle').value=c.title||'';setContentEditor(c.body||'');const btn=document.getElementById('cntSaveBtn');if(btn)btn.textContent='✏️ আপডেট';const cb=document.getElementById('cntCancelBtn');if(cb)cb.style.display='block';renderContentList();scrollToId('cntTitle');toast('✏️ এডিট')}
 function cancelEditContent(){state.ui.editingContentId=null;document.getElementById('cntTitle').value='';clearContentEditor();const btn=document.getElementById('cntSaveBtn');if(btn)btn.textContent='💾 সেভ';const cb=document.getElementById('cntCancelBtn');if(cb)cb.style.display='none';renderContentList();toast('❌ বাতিল')}
 async function deleteContent(id){if(!confirm('মুছবেন?'))return;await deleteFrom('contents',id);if(state.ui.editingContentId===id)cancelEditContent();await refreshState();fillAdminSelects();toast('🗑️ মুছে ফেলা','success')}
 async function saveContent(){syncContentEditor();const eid=document.getElementById('cntExam').value,sub=document.getElementById('cntSubject').value,type=document.getElementById('cntType').value,title=document.getElementById('cntTitle').value.trim(),body=sanitizeRichHtml(document.getElementById('cntBodyEditor').innerHTML);if(!sub)return toast('বিষয় নির্বাচন','error');if(!type)return toast('❌ কোনো টাইপ চালু নেই','error');if(!title)return toast('শিরোনাম দিন','error');if(!body||!document.getElementById('cntBodyEditor').textContent.trim()&&!document.getElementById('cntBodyEditor').querySelector('img,br'))return toast('বিষয়বস্তু দিন','error');const allowed=getContentTypesForSubject(eid,sub);if(!allowed.includes(type))return toast(`⚠️ "${type}" চালু নেই`,'error');if(state.ui.editingContentId){const existing=state.contents.find(c=>c.id===state.ui.editingContentId);if(!existing)return toast('পাওয়া যায়নি','error');await putAll('contents',[{...existing,examId:eid,subject:sub.trim(),type,title,body,updatedAt:Date.now()}]);state.ui.editingContentId=null;document.getElementById('cntTitle').value='';clearContentEditor();const btn=document.getElementById('cntSaveBtn');if(btn)btn.textContent='💾 সেভ';const cb=document.getElementById('cntCancelBtn');if(cb)cb.style.display='none';await refreshState();fillAdminSelects();toast(`✅ "${title}" আপডেট`,'success');return}await putAll('contents',[{id:'cnt_'+Date.now(),examId:eid,subject:sub.trim(),type,title,body,createdAt:Date.now()}]);await refreshState();fillAdminSelects();toast(`✅ "${title}" সেভ`,'success');document.getElementById('cntTitle').value='';clearContentEditor()}
 
 /* ===== NOTIFICATION ===== */
-function renderNotifList(){const el=document.getElementById('notifList');if(!el)return;document.getElementById('notifCount').textContent=state.notifications.length;if(!state.notifications.length){el.innerHTML='<p class="muted" style="font-size:11px">কোনো নোটিফিকেশন নেই</p>';return}el.innerHTML=state.notifications.slice(0,50).map(n=>`<div class="cat-item" style="${state.ui.editingNotifId===n.id?'border-color:var(--warning);background:rgba(245,158,11,.08)':''}"><div class="cat-icon" style="background:rgba(var(--brand-rgb),.15);color:var(--text)">🔔</div><div style="flex:1;min-width:0"><div style="font-weight:800;font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(n.title)}</div><div class="muted" style="font-size:10px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(n.body)}</div></div><button class="btn btn-sm btn-warning btn-icon" onclick="editNotif('${n.id}')">✏️</button><button class="btn btn-sm btn-danger btn-icon" onclick="deleteNotification('${n.id}')">×</button></div>`).join('');renderEditBanners()}
-function editNotif(id){const n=state.notifications.find(x=>x.id===id);if(!n)return;state.ui.editingNotifId=id;document.getElementById('notifTitle').value=n.title||'';document.getElementById('notifBody').value=n.body||'';document.getElementById('notifType').value=n.type||'info';const btn=document.getElementById('notifSaveBtn');if(btn)btn.textContent='✏️ আপডেট';const cb=document.getElementById('notifCancelBtn');if(cb)cb.style.display='block';renderNotifList();scrollToId('notifTitle');toast('✏️ এডিট')}
-function cancelEditNotif(){state.ui.editingNotifId=null;['notifTitle','notifBody'].forEach(id=>{const el=document.getElementById(id);if(el)el.value=''});const btn=document.getElementById('notifSaveBtn');if(btn)btn.textContent='📤 পাঠান';const cb=document.getElementById('notifCancelBtn');if(cb)cb.style.display='none';renderNotifList();toast('❌ বাতিল')}
+function renderNotifList(){const el=document.getElementById('notifList');if(!el)return;document.getElementById('notifCount').textContent=state.notifications.length;if(!state.notifications.length){el.innerHTML='<p class="muted" style="font-size:11px">কোনো নোটিফিকেশন নেই</p>';return}el.innerHTML=state.notifications.slice(0,50).map(n=>`<div class="cat-item" style="${state.ui.editingNotifId===n.id?'border-color:var(--warning);background:rgba(245,158,11,.08)':''}"><div class="cat-icon" style="background:rgba(var(--brand-rgb),.15);color:var(--text)">🔔</div><div style="flex:1;min-width:0"><div style="font-weight:800;font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(n.title)}</div><div class="muted" style="font-size:10px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(richHtmlToPlainText(n.body))}</div></div><button class="btn btn-sm btn-warning btn-icon" onclick="editNotif('${n.id}')">✏️</button><button class="btn btn-sm btn-danger btn-icon" onclick="deleteNotification('${n.id}')">×</button></div>`).join('');renderEditBanners()}
+function editNotif(id){const n=state.notifications.find(x=>x.id===id);if(!n)return;state.ui.editingNotifId=id;document.getElementById('notifTitle').value=n.title||'';setRichFieldValue('notifBody',n.body||'');document.getElementById('notifType').value=n.type||'info';const btn=document.getElementById('notifSaveBtn');if(btn)btn.textContent='✏️ আপডেট';const cb=document.getElementById('notifCancelBtn');if(cb)cb.style.display='block';renderNotifList();scrollToId('notifTitle');toast('✏️ এডিট')}
+function cancelEditNotif(){state.ui.editingNotifId=null;['notifTitle','notifBody'].forEach(id=>{const el=document.getElementById(id);if(el)el.value=''});clearRichField('notifBody');const btn=document.getElementById('notifSaveBtn');if(btn)btn.textContent='📤 পাঠান';const cb=document.getElementById('notifCancelBtn');if(cb)cb.style.display='none';renderNotifList();toast('❌ বাতিল')}
 async function deleteNotification(id){await deleteFrom('notifications',id);if(state.ui.editingNotifId===id)cancelEditNotif();await refreshState();fillAdminSelects();toast('🗑️ মুছে ফেলা','success')}
-async function sendNotificationAdmin(){const title=document.getElementById('notifTitle').value.trim(),body=document.getElementById('notifBody').value.trim(),type=document.getElementById('notifType').value;if(!title||!body)return toast('শিরোনাম ও বার্তা দিন','error');if(state.ui.editingNotifId){const ex=state.notifications.find(n=>n.id===state.ui.editingNotifId);if(!ex)return toast('পাওয়া যায়নি','error');await putAll('notifications',[{...ex,title,body,type,updatedAt:Date.now()}]);state.ui.editingNotifId=null;['notifTitle','notifBody'].forEach(id=>{const el=document.getElementById(id);if(el)el.value=''});const btn=document.getElementById('notifSaveBtn');if(btn)btn.textContent='📤 পাঠান';const cb=document.getElementById('notifCancelBtn');if(cb)cb.style.display='none';await refreshState();fillAdminSelects();toast('✅ আপডেট','success');return}await putAll('notifications',[{id:'notif_'+Date.now(),title,body,type,createdAt:Date.now(),read:false}]);await refreshState();fillAdminSelects();document.getElementById('notifTitle').value='';document.getElementById('notifBody').value='';toast('📤 পাঠানো','success')}
+async function sendNotificationAdmin(){const title=document.getElementById('notifTitle').value.trim(),body=getRichFieldValue('notifBody').trim(),type=document.getElementById('notifType').value;if(!title||!richHtmlToPlainText(body))return toast('শিরোনাম ও বার্তা দিন','error');if(state.ui.editingNotifId){const ex=state.notifications.find(n=>n.id===state.ui.editingNotifId);if(!ex)return toast('পাওয়া যায়নি','error');await putAll('notifications',[{...ex,title,body,type,updatedAt:Date.now()}]);state.ui.editingNotifId=null;['notifTitle','notifBody'].forEach(id=>{const el=document.getElementById(id);if(el)el.value=''});clearRichField('notifBody');const btn=document.getElementById('notifSaveBtn');if(btn)btn.textContent='📤 পাঠান';const cb=document.getElementById('notifCancelBtn');if(cb)cb.style.display='none';await refreshState();fillAdminSelects();toast('✅ আপডেট','success');return}await putAll('notifications',[{id:'notif_'+Date.now(),title,body,type,createdAt:Date.now(),read:false}]);await refreshState();fillAdminSelects();document.getElementById('notifTitle').value='';document.getElementById('notifBody').value='';clearRichField('notifBody');toast('📤 পাঠানো','success')}
 
 /* ===== LB + DC ===== */
 function renderLbList(){const el=document.getElementById('lbList');if(!el)return;document.getElementById('lbCount').textContent=state.leaderboard.length;if(!state.leaderboard.length){el.innerHTML='<p class="muted" style="font-size:11px">কোনো এন্ট্রি নেই</p>';return}const s=[...state.leaderboard].sort((a,b)=>(b.score||0)-(a.score||0));el.innerHTML=s.slice(0,50).map((e,i)=>`<div class="cat-item" style="${state.ui.editingLbId===e.id?'border-color:var(--warning);background:rgba(245,158,11,.08)':''}"><div class="cat-icon" style="background:rgba(var(--brand-rgb),.15);color:var(--text);font-size:14px;font-weight:900">${i+1}</div><div style="flex:1;min-width:0"><div style="font-weight:800;font-size:12px">${esc(e.name)}</div><div class="muted" style="font-size:10px">${esc(e.exam||'')} • ${e.score}</div></div><button class="btn btn-sm btn-warning btn-icon" onclick="editLb('${e.id}')">✏️</button><button class="btn btn-sm btn-danger btn-icon" onclick="deleteLbEntry('${e.id}')">×</button></div>`).join('');renderEditBanners()}
@@ -735,7 +759,7 @@ function renderCategoryLists(){
 async function saveExamCategory(){
   const title=document.getElementById('catTitle').value.trim();
   if(!title)return toast('নাম দিন','error');
-  const icon=document.getElementById('catIcon').value.trim()||'📚',tag=document.getElementById('catTag').value.trim()||title.slice(0,4).toUpperCase(),desc=document.getElementById('catDesc').value.trim()||'নতুন পরীক্ষা',grad=GRADIENTS[state.ui.pickedGradient].value;
+  const icon=document.getElementById('catIcon').value.trim()||'📚',tag=document.getElementById('catTag').value.trim()||title.slice(0,4).toUpperCase(),desc=getRichFieldValue('catDesc').trim()||'নতুন পরীক্ষা',grad=GRADIENTS[state.ui.pickedGradient].value;
   const contentTypes=getCheckedTypes('catContentTypes');
   if(!contentTypes.length)return toast('⚠️ কমপক্ষে ১টি টাইপ চেক করুন','error');
   if(state.ui.editingCategoryId){
@@ -743,7 +767,7 @@ async function saveExamCategory(){
     if(!ex)return toast('পাওয়া যায়নি','error');
     await putAll('categories',[{...ex,title,icon,tag,desc,grad,contentTypes,updatedAt:Date.now()}]);
     state.ui.editingCategoryId=null;
-    ['catTitle','catIcon','catTag','catDesc'].forEach(id=>{const el=document.getElementById(id);if(el)el.value=''});
+    ['catTitle','catIcon','catTag','catDesc'].forEach(id=>{const el=document.getElementById(id);if(el)el.value=''});clearRichField('catDesc');
     const btn=document.getElementById('catSaveBtn');if(btn)btn.textContent='➕ নতুন পরীক্ষা';
     const cb=document.getElementById('catCancelBtn');if(cb)cb.style.display='none';
     renderTypeCheckboxes('catContentTypes',getAllTypeKeys());
@@ -756,7 +780,7 @@ async function saveExamCategory(){
   await putAll('categories',items);await refreshState();fillAdminSelects();
   renderTypeCheckboxes('catContentTypes',getAllTypeKeys());
   toast(`✅ "${title}" + ৪টি বিষয়`,'success');
-  ['catTitle','catIcon','catTag','catDesc'].forEach(id=>{const el=document.getElementById(id);if(el)el.value=''});
+  ['catTitle','catIcon','catTag','catDesc'].forEach(id=>{const el=document.getElementById(id);if(el)el.value=''});clearRichField('catDesc');
 }
 function editCategory(id){
   const c=state.examTypes.find(e=>e.id===id);if(!c)return;
@@ -764,7 +788,7 @@ function editCategory(id){
   document.getElementById('catTitle').value=c.title||'';
   document.getElementById('catIcon').value=c.icon||'';
   document.getElementById('catTag').value=c.tag||'';
-  document.getElementById('catDesc').value=c.desc||'';
+  setRichFieldValue('catDesc',c.desc||'');
   const gi=GRADIENTS.findIndex(g=>g.value===c.grad);if(gi>=0){state.ui.pickedGradient=gi;renderGradientPicker()}
   renderTypeCheckboxes('catContentTypes',c.contentTypes||getAllTypeKeys());
   const btn=document.getElementById('catSaveBtn');if(btn)btn.textContent='✏️ আপডেট';
@@ -774,7 +798,7 @@ function editCategory(id){
 }
 function cancelEditCategory(){
   state.ui.editingCategoryId=null;
-  ['catTitle','catIcon','catTag','catDesc'].forEach(id=>{const el=document.getElementById(id);if(el)el.value=''});
+  ['catTitle','catIcon','catTag','catDesc'].forEach(id=>{const el=document.getElementById(id);if(el)el.value=''});clearRichField('catDesc');
   renderTypeCheckboxes('catContentTypes',getAllTypeKeys());
   const btn=document.getElementById('catSaveBtn');if(btn)btn.textContent='➕ নতুন পরীক্ষা';
   const cb=document.getElementById('catCancelBtn');if(cb)cb.style.display='none';
@@ -889,7 +913,7 @@ function renderAdminJobList(){
   renderEditBanners();
 }
 async function saveJobNotification(){
-  const title=document.getElementById('jobTitle').value.trim(),org=document.getElementById('jobOrg').value.trim(),type=document.getElementById('jobType').value,url=document.getElementById('jobUrl').value.trim(),desc=document.getElementById('jobDesc').value.trim(),deadline=document.getElementById('jobDeadline').value,color=JOB_COLORS[state.ui.pickedJobColor]||JOB_COLORS[0];
+  const title=document.getElementById('jobTitle').value.trim(),org=document.getElementById('jobOrg').value.trim(),type=document.getElementById('jobType').value,url=document.getElementById('jobUrl').value.trim(),desc=getRichFieldValue('jobDesc').trim(),deadline=document.getElementById('jobDeadline').value,color=JOB_COLORS[state.ui.pickedJobColor]||JOB_COLORS[0];
   if(!title)return toast('নাম দিন','error');
   if(type!=='text'&&!url)return toast('URL দিন','error');
   if(state.ui.editingJobId){
@@ -897,7 +921,7 @@ async function saveJobNotification(){
     if(!ex)return toast('পাওয়া যায়নি','error');
     await putAll('jobNotifications',[{...ex,title,org,type,url,desc,deadline,color,updatedAt:Date.now()}]);
     state.ui.editingJobId=null;
-    ['jobTitle','jobOrg','jobUrl','jobDesc','jobDeadline'].forEach(id=>{const el=document.getElementById(id);if(el)el.value=''});
+    ['jobTitle','jobOrg','jobUrl','jobDesc','jobDeadline'].forEach(id=>{const el=document.getElementById(id);if(el)el.value=''});clearRichField('jobDesc');
     const btn=document.getElementById('jobSaveBtn');if(btn)btn.textContent='➕ যোগ';
     const cb=document.getElementById('jobCancelBtn');if(cb)cb.style.display='none';
     await refreshState();fillAdminSelects();
@@ -905,7 +929,7 @@ async function saveJobNotification(){
   }
   await putAll('jobNotifications',[{id:'job_'+Date.now(),title,org,type,url,desc,deadline,color,createdAt:Date.now()}]);
   await refreshState();fillAdminSelects();
-  ['jobTitle','jobOrg','jobUrl','jobDesc','jobDeadline'].forEach(id=>{const el=document.getElementById(id);if(el)el.value=''});
+  ['jobTitle','jobOrg','jobUrl','jobDesc','jobDeadline'].forEach(id=>{const el=document.getElementById(id);if(el)el.value=''});clearRichField('jobDesc');
   toast('✅ যোগ হয়েছে','success');
 }
 function editJob(id){
@@ -915,7 +939,7 @@ function editJob(id){
   document.getElementById('jobOrg').value=j.org||'';
   document.getElementById('jobType').value=j.type||'link';
   document.getElementById('jobUrl').value=j.url||'';
-  document.getElementById('jobDesc').value=j.desc||'';
+  setRichFieldValue('jobDesc',j.desc||'');
   document.getElementById('jobDeadline').value=j.deadline||'';
   const ci=JOB_COLORS.indexOf(j.color);if(ci>=0){state.ui.pickedJobColor=ci;renderJobColorPicker()}
   const btn=document.getElementById('jobSaveBtn');if(btn)btn.textContent='✏️ আপডেট';
@@ -925,7 +949,7 @@ function editJob(id){
 }
 function cancelEditJob(){
   state.ui.editingJobId=null;
-  ['jobTitle','jobOrg','jobUrl','jobDesc','jobDeadline'].forEach(id=>{const el=document.getElementById(id);if(el)el.value=''});
+  ['jobTitle','jobOrg','jobUrl','jobDesc','jobDeadline'].forEach(id=>{const el=document.getElementById(id);if(el)el.value=''});clearRichField('jobDesc');
   const btn=document.getElementById('jobSaveBtn');if(btn)btn.textContent='➕ যোগ';
   const cb=document.getElementById('jobCancelBtn');if(cb)cb.style.display='none';
   renderAdminJobList();toast('❌ বাতিল');
@@ -960,6 +984,7 @@ importFile?.addEventListener('change',e=>handleAdminFile(e.target.files[0]));
 dropZone?.addEventListener('drop',e=>handleAdminFile(e.dataTransfer.files[0]));
 async function handleAdminFile(file){if(!file)return;if(!confirm('পুরোনো ডেটা মুছে ফেলবে?'))return;try{const json=JSON.parse(await file.text());if(!Array.isArray(json.mcqs))throw 0;await bulkImport(json);await setMeta('cloudDirty',true);scheduleCloudSync();await refreshState();fillAdminSelects();renderAdmin();toast(`✅ ${json.mcqs.length} MCQ লোড—ক্লাউডে সেভ হচ্ছে`,'success')}catch{toast('❌ ভুল ফাইল','error')}}
 
+initRichTextFields();
 initFirebase();
 </script>
 </body>
