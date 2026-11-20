@@ -7,7 +7,8 @@
 <meta name="theme-color" content="#6366f1" />
 <title>West Bengal: Exam & Mock Hub</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&family=Inter:wght@600;700;800;900&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+Da+2:wght@400;500;600;700&family=Hind+Siliguri:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800;900&family=Merriweather:wght@400;700;900&family=Noto+Sans+Bengali:wght@400;500;600;700&family=Noto+Serif+Bengali:wght@400;600;700&family=Source+Sans+3:wght@400;600;700;800&display=swap" rel="stylesheet">
 <style>
 :root{--brand:#6366f1;--brand-2:#8b5cf6;--brand-3:#ec4899;--brand-rgb:99,102,241;--success:#10b981;--danger:#ef4444;--bg:#f8fafc;--card:#fff;--text:#0f172a;--muted:#64748b;--border:rgba(148,163,184,.15);--radius:20px;--shadow:0 4px 24px -8px rgba(15,23,42,.08);--header-bg:rgba(255,255,255,.92)}
 [data-color="indigo"]{--brand:#6366f1;--brand-2:#8b5cf6;--brand-3:#ec4899;--brand-rgb:99,102,241}
@@ -221,7 +222,7 @@ textarea{resize:vertical;min-height:80px}
 .content-item-box{margin-bottom:12px;padding:14px;border-radius:12px;background:rgba(148,163,184,.06);border:1px solid var(--border)}
 .content-item-header{font-weight:800;font-size:13px;margin-bottom:10px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
 .content-item-header .title-text{flex:1;min-width:120px}
-.content-item-body{white-space:pre-line;opacity:.88;line-height:1.6}
+.content-item-body{white-space:pre-line;line-height:1.78;color:var(--text)}
 @media (prefers-reduced-motion:reduce){*{animation:none !important;transition:none !important}}
 
 /* Rich text notes created in the Admin panel */
@@ -245,6 +246,13 @@ textarea{resize:vertical;min-height:80px}
 .notif-text p{margin:0 0 5px}
 .notif-text ul,.notif-text ol{margin:4px 0;padding-left:20px}
 .content-item-body img{max-width:100%;height:auto}
+.content-item-box{border-radius:16px;box-shadow:0 6px 22px -16px rgba(15,23,42,.35);padding:16px}
+.content-item-body{font-family:'Hind Siliguri','Inter',sans-serif;letter-spacing:.005em}
+.content-item-body b,.content-item-body strong{font-weight:700;color:inherit}
+.content-item-body h2,.content-item-body h3{font-weight:700;color:var(--text)}
+.content-item-body mark{box-decoration-break:clone;-webkit-box-decoration-break:clone}
+.card,.content-card,.subj-card{transition:transform .18s ease,box-shadow .18s ease,border-color .18s ease}
+.card:hover{border-color:rgba(var(--brand-rgb),.2)}
 
 .subject-page-top{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:12px}.subject-hero{display:flex;align-items:center;gap:14px;padding:18px;margin-bottom:12px;border-radius:18px;background:linear-gradient(135deg,rgba(var(--brand-rgb),.15),rgba(var(--brand-rgb),.04));border:1px solid var(--border)}.subject-hero-icon{width:54px;height:54px;display:grid;place-items:center;border-radius:16px;background:var(--card);font-size:28px;box-shadow:0 5px 16px rgba(15,23,42,.08)}.subject-hero h2{margin:2px 0;font-size:20px}.subject-hero p{margin:3px 0 0;color:var(--muted);font-size:11px}.subject-mcq-action{display:flex;align-items:center;gap:12px;width:100%;padding:13px 15px;margin-bottom:18px;border:1px solid var(--border);border-radius:14px;background:var(--card);color:var(--text);text-align:left;cursor:pointer;font-family:inherit}.subject-mcq-action>span:first-child{font-size:24px}.subject-mcq-action>span:nth-child(2){display:flex;flex-direction:column;gap:3px;flex:1}.subject-mcq-action small{color:var(--muted);font-size:10px}.subject-mcq-action>b{font-size:18px;color:var(--brand)}.subject-content-heading{display:flex;align-items:center;justify-content:space-between;margin:0 2px 10px}.subject-content-heading h3{margin:0;font-size:15px}.subject-content-heading span{color:var(--muted);font-size:10px}.subject-type-grid .content-card{width:100%;min-height:120px;text-align:center;color:var(--text);font-family:inherit;cursor:pointer}.subject-type-arrow{display:block;margin-top:7px;color:var(--brand);font-size:10px;font-weight:800}
 </style>
@@ -574,6 +582,7 @@ function sanitizeStudentRichHtml(value=''){
   const allowed=new Set(['P','BR','B','STRONG','I','EM','U','S','SPAN','MARK','H2','H3','UL','OL','LI','BLOCKQUOTE','A']);
   const dangerous=new Set(['SCRIPT','STYLE','IFRAME','OBJECT','EMBED','SVG','MATH','FORM','INPUT','BUTTON','VIDEO','AUDIO']);
   const safeColor=v=>{v=String(v||'').trim();return /^(#[0-9a-f]{3,8}|(?:rgb|rgba|hsl|hsla)\([0-9.% ,/+-]+\)|[a-z]{3,20})$/i.test(v)?v:''};
+  const safeFont=v=>{const first=String(v||'').split(',')[0].replace(/["']/g,'').trim().toLowerCase();const names={"hind siliguri":"'Hind Siliguri',sans-serif","noto sans bengali":"'Noto Sans Bengali',sans-serif","noto serif bengali":"'Noto Serif Bengali',serif","baloo da 2":"'Baloo Da 2',cursive",inter:'Inter,sans-serif',"source sans 3":"'Source Sans 3',sans-serif",merriweather:'Merriweather,serif'};return names[first]||''};
   const clean=parent=>{
     for(const node of Array.from(parent.childNodes)){
       if(node.nodeType!==1)continue;
@@ -584,18 +593,20 @@ function sanitizeStudentRichHtml(value=''){
         const span=parsed.createElement('span'),map={'1':'11px','2':'13px','3':'16px','4':'19px','5':'24px','6':'30px','7':'36px'};
         if(map[node.getAttribute('size')])span.style.fontSize=map[node.getAttribute('size')];
         const color=safeColor(node.getAttribute('color'));if(color)span.style.color=color;
+        const family=safeFont(node.getAttribute('face'));if(family)span.style.fontFamily=family;
         while(node.firstChild)span.appendChild(node.firstChild);node.replaceWith(span);continue;
       }
       if(!allowed.has(tag)){const frag=parsed.createDocumentFragment();while(node.firstChild)frag.appendChild(node.firstChild);node.replaceWith(frag);continue;}
       const href=tag==='A'?node.getAttribute('href'):null;
-      const color=safeColor(node.style?.color),bg=safeColor(node.style?.backgroundColor);
+      const color=safeColor(node.style?.color),bg=safeColor(node.style?.backgroundColor),fontFamily=safeFont(node.style?.fontFamily);
+      const fontWeight=/^(400|500|600|700|800|900)$/.test(node.style?.fontWeight||'')?node.style.fontWeight:'';
       let size=(node.style?.fontSize||'').trim();
       if(!/^(?:(?:[1-9]\d?|100)(?:px|pt|em|rem|%)|xx-small|x-small|small|medium|large|x-large|xx-large|smaller|larger)$/i.test(size))size='';
       const lh=Number(node.style?.lineHeight),lineHeight=Number.isFinite(lh)&&lh>=1&&lh<=3?String(lh):'';
       const textAlign=['left','center','right','justify'].includes(node.style?.textAlign)?node.style.textAlign:'';
       for(const attr of Array.from(node.attributes))node.removeAttribute(attr.name);
       if(tag==='A'&&href){try{const url=new URL(href,location.href);if(['http:','https:','mailto:','tel:'].includes(url.protocol)){node.setAttribute('href',url.href);if(url.protocol==='http:'||url.protocol==='https:'){node.setAttribute('target','_blank');node.setAttribute('rel','noopener noreferrer')}}}catch{}}
-      if(tag==='SPAN'){if(color)node.style.color=color;if(bg)node.style.backgroundColor=bg;if(size)node.style.fontSize=size;}
+      if(tag==='SPAN'){if(color)node.style.color=color;if(bg)node.style.backgroundColor=bg;if(size)node.style.fontSize=size;if(fontFamily)node.style.fontFamily=fontFamily;if(fontWeight)node.style.fontWeight=fontWeight;}
       if(['P','H2','H3','LI','BLOCKQUOTE'].includes(tag)){if(lineHeight)node.style.lineHeight=lineHeight;if(textAlign)node.style.textAlign=textAlign}
       if(tag==='MARK'&&bg)node.style.backgroundColor=bg;
     }
