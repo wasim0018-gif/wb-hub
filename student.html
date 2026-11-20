@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<tml lang="bn" data-color="indigo">
+<html lang="bn" data-color="indigo">
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no" />
@@ -346,9 +346,13 @@ async function hydrate(){
   const[mcqs,exams,contents,submissions,bookmarks,leaderboard,notifications,dailyChallenges,challengeCompletions,jobNotifications,dark,colorTheme,lastExamId]=await Promise.all([getAll('mcqs'),getAll('exams'),getAll('contents'),getAll('submissions'),getAll('bookmarks'),getAll('leaderboard'),getAll('notifications'),getAll('dailyChallenges'),getAll('challengeCompletions'),getAll('jobNotifications'),getMeta('darkMode'),getMeta('colorTheme'),getMeta('lastExamId')]);
   state.mcqs=mcqs;state.exams=exams;state.contents=contents;state.submissions=submissions;state.bookmarks=bookmarks;state.leaderboard=leaderboard;state.notifications=notifications.sort((a,b)=>(b.createdAt||0)-(a.createdAt||0));state.dailyChallenges=dailyChallenges;state.challengeCompletions=challengeCompletions;
   state.jobNotifications=jobNotifications.sort((a,b)=>(b.createdAt||0)-(a.createdAt||0));
-  state.examTypes=cats.filter(c=>c.type==='exam').sort((a,b)=>(a.order||0)-(b.order||0));
-  state.subjectList=cats.filter(c=>c.type==='subject').sort((a,b)=>(a.order||0)-(b.order||0));
-  state.ui.darkMode=dark===true;state.ui.colorTheme=colorTheme||'indigo';state.ui.lastExamId=lastExamId||(state.examTypes[0]?.id||'wb_tet');state.ui.loading=false;
+  state.examTypes=cats.filter(c=>c.type==='exam'&&c.isActive!==false).sort((a,b)=>(a.order||0)-(b.order||0));
+  const visibleExamIds=new Set(state.examTypes.map(e=>e.id));
+  state.subjectList=cats.filter(c=>c.type==='subject'&&visibleExamIds.has(c.examId)).sort((a,b)=>(a.order||0)-(b.order||0));
+  state.mcqs=mcqs.filter(x=>!x.examId||visibleExamIds.has(x.examId));
+  state.contents=contents.filter(x=>!x.examId||visibleExamIds.has(x.examId));
+  state.exams=exams.filter(x=>!x.examId||visibleExamIds.has(x.examId));
+  state.ui.darkMode=dark===true;state.ui.colorTheme=colorTheme||'indigo';const defaultExamId=state.examTypes[0]?.id||'';state.ui.lastExamId=state.examTypes.some(e=>e.id===lastExamId)?lastExamId:defaultExamId;if(!visibleExamIds.has(state.ui.examId))state.ui.examId=defaultExamId;if(state.ui.screen==='liveTake'&&!state.exams.some(e=>e.id===state.ui.liveExamId))state.ui.screen='live';if(['hub','contentType'].includes(state.ui.screen)&&!visibleExamIds.size)state.ui.screen='welcome';state.ui.loading=false;
   const defSubs=getSubjectsForExam(state.ui.lastExamId);
   if(defSubs.length&&!defSubs.find(s=>s.name===state.ui.subject))state.ui.subject=defSubs[0].name;
   state.ui.streak=await updateStreak();updateUnreadCount();updateJobsBadge();
@@ -479,7 +483,7 @@ function startTimer(){stopTimer();state.ui.quizStartTime=Date.now();_timerInterv
 function formatDuration(ms){const s=Math.floor(ms/1000);return`${String(Math.floor(s/60)).padStart(2,'0')}:${String(s%60).padStart(2,'0')}`}
 nav.addEventListener('click',e=>{const btn=e.target.closest('button[data-tab]');if(!btn)return;stopTimer();nav.querySelectorAll('button').forEach(b=>b.classList.toggle('active',b===btn));state.ui.screen=btn.dataset.tab;state.ui.quizIndex=0;state.ui.selectedOpt=null;renderStudent()});
 function goScreen(scr){stopTimer();nav.querySelectorAll('button').forEach(b=>b.classList.toggle('active',b.dataset.tab===scr));state.ui.screen=scr;renderStudent()}
-async function openHub(id){state.ui.screen='hub';state.ui.examId=id;state.ui.quizIndex=0;state.ui.selectedOpt=null;state.ui.lastExamId=id;const es=getSubjectsForExam(id);if(es.length&&!es.find(s=>s.name===state.ui.subject))state.ui.subject=es[0].name;await setMeta('lastExamId',id);startTimer();renderStudent()}
+async function openHub(id){if(!state.examTypes.some(e=>e.id===id)){toast('এই পরীক্ষা বর্তমানে Student অ্যাপে বন্ধ আছে','error');return}state.ui.screen='hub';state.ui.examId=id;state.ui.quizIndex=0;state.ui.selectedOpt=null;state.ui.lastExamId=id;const es=getSubjectsForExam(id);if(es.length&&!es.find(s=>s.name===state.ui.subject))state.ui.subject=es[0].name;await setMeta('lastExamId',id);startTimer();renderStudent()}
 function openContentType(type){state.ui.contentType=type;state.ui.screen='contentType';renderStudent()}
 function backFromContentType(){state.ui.contentType=null;state.ui.screen='hub';renderStudent()}
 function selectSubject(name){state.ui.subject=name;state.ui.quizIndex=0;state.ui.selectedOpt=null;renderStudent()}
