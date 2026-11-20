@@ -81,6 +81,9 @@ label{font-size:11px;font-weight:700;color:var(--muted);display:block;margin:10p
 .content-editor:empty:before{content:attr(data-placeholder);color:var(--muted);pointer-events:none}
 .content-editor h2,.content-editor h3{margin:10px 0 6px}.content-editor ul,.content-editor ol{padding-left:24px;margin:6px 0}.content-editor blockquote{margin:8px 0;padding:7px 12px;border-left:3px solid var(--brand);background:rgba(var(--brand-rgb),.08)}
 .rich-editor-hint{font-size:10px;color:var(--muted);margin-top:5px;line-height:1.5}
+
+.visibility-setting{display:flex;align-items:center;gap:6px;padding:9px 11px;border:1px solid var(--border);border-radius:10px;background:rgba(var(--brand-rgb),.05);cursor:pointer}.visibility-setting input{accent-color:var(--success)}
+.visibility-row{display:inline-flex;align-items:center;gap:4px;margin:0;padding:4px 5px;border:1px solid var(--border);border-radius:8px;color:var(--muted);font-size:9px;font-weight:800;white-space:nowrap;cursor:pointer}.visibility-row input{width:15px;height:15px;margin:0;accent-color:var(--success)}
 </style>
 </head>
 <body>
@@ -240,6 +243,8 @@ label{font-size:11px;font-weight:700;color:var(--muted);display:block;margin:10p
       </div>
       <label>সংক্ষিপ্ত বিবরণ — ফরম্যাটিংসহ</label>
       <div id="catDescRichMount"></div><textarea id="catDesc" rows="3" style="display:none" aria-hidden="true"></textarea>
+      <label class="visibility-setting"><input id="catStudentVisible" type="checkbox" checked style="width:auto;margin-right:7px"> Student অ্যাপে এই পরীক্ষা দেখান</label>
+      <p class="muted" style="font-size:10px;margin:-4px 0 8px">টিক থাকলে Student অ্যাপে পরীক্ষা ও এর কনটেন্ট দেখা যাবে; টিক তুলে দিলে Admin-এ থাকবে, Student অ্যাপে লুকানো থাকবে।</p>
       <label>রঙ</label>
       <div id="gradPicker" style="margin-bottom:8px"></div>
       <label style="margin-top:6px">📋 Content Types (এই পরীক্ষায় কোন ধরনের কনটেন্ট)</label>
@@ -745,6 +750,7 @@ async function deleteDc(id){await deleteFrom('dailyChallenges',id);if(state.ui.e
 async function saveDailyChallenge(){const date=document.getElementById('dcDate').value,mcqId=document.getElementById('dcMcq').value,bonus=Number(document.getElementById('dcBonus').value)||50;if(!date)return toast('তারিখ দিন','error');if(!mcqId)return toast('MCQ বাছুন','error');if(state.ui.editingDcId){const ex=state.dailyChallenges.find(c=>c.id===state.ui.editingDcId);if(!ex)return toast('পাওয়া যায়নি','error');await putAll('dailyChallenges',[{...ex,date,mcqId,bonus,updatedAt:Date.now()}]);state.ui.editingDcId=null;document.getElementById('dcDate').value=getTodayDate();document.getElementById('dcBonus').value=50;const btn=document.getElementById('dcSaveBtn');if(btn)btn.textContent='🎯 সেট';const cb=document.getElementById('dcCancelBtn');if(cb)cb.style.display='none';await refreshState();fillAdminSelects();toast('✅ আপডেট','success');return}const ex=state.dailyChallenges.find(c=>c.date===date);await putAll('dailyChallenges',[{id:ex?.id||'dc_'+Date.now(),date,mcqId,bonus,createdAt:Date.now()}]);await refreshState();fillAdminSelects();toast(`✅ সেট`,'success')}
 
 /* ===== CATEGORY ===== */
+async function toggleExamVisibility(id,isActive){const ex=state.examTypes.find(e=>e.id===id);if(!ex)return;await putAll('categories',[{...ex,isActive:!!isActive,updatedAt:Date.now()}]);await refreshState();fillAdminSelects();renderAdmin();toast(isActive?`✅ ${ex.title} Student অ্যাপে চালু`:`⏸️ ${ex.title} Student অ্যাপে লুকানো`,'success')}
 function renderCategoryLists(){
   const el=document.getElementById('catExamList');if(!el)return;
   document.getElementById('catCount').textContent=state.examTypes.length;
@@ -752,22 +758,22 @@ function renderCategoryLists(){
     const subs=getSubjectsForExam(e.id);
     const types=e.contentTypes||getAllTypeKeys();
     const typeIcons=state.contentTypes.filter(t=>types.includes(t.key)).map(t=>`<span class="type-icon-badge" title="${t.label}" style="background:${t.color}22;color:${t.color}">${t.icon}</span>`).join('');
-    return `<div class="cat-item" style="${state.ui.editingCategoryId===e.id?'border-color:var(--warning);background:rgba(245,158,11,.08)':''}"><div class="cat-icon" style="background:${e.grad}">${e.icon}</div><div style="flex:1;min-width:0"><div style="font-weight:800;font-size:12px">${esc(e.title)}</div><div class="muted" style="font-size:10px;margin-top:2px">${subs.length}টি বিষয় • ${typeIcons}</div></div><button class="btn btn-sm btn-warning btn-icon" onclick="editCategory('${e.id}')">✏️</button><button class="btn btn-sm btn-danger btn-icon" onclick="deleteCategory('${e.id}')">×</button></div>`;
+    return `<div class="cat-item" style="${state.ui.editingCategoryId===e.id?'border-color:var(--warning);background:rgba(245,158,11,.08)':''}"><div class="cat-icon" style="background:${e.grad}">${e.icon}</div><div style="flex:1;min-width:0"><div style="font-weight:800;font-size:12px">${esc(e.title)}</div><div class="muted" style="font-size:10px;margin-top:2px">${subs.length}টি বিষয় • ${typeIcons}</div></div><label class="visibility-row" title="Student অ্যাপে দেখানো হবে" onclick="event.stopPropagation()"><input type="checkbox" ${e.isActive!==false?'checked':''} onchange="toggleExamVisibility('${e.id}',this.checked)"> Student</label><button class="btn btn-sm btn-warning btn-icon" onclick="editCategory('${e.id}')">✏️</button><button class="btn btn-sm btn-danger btn-icon" onclick="deleteCategory('${e.id}')">×</button></div>`;
   }).join(''):'<p class="muted" style="font-size:11px">কোনো পরীক্ষা নেই</p>';
   renderEditBanners();
 }
 async function saveExamCategory(){
   const title=document.getElementById('catTitle').value.trim();
   if(!title)return toast('নাম দিন','error');
-  const icon=document.getElementById('catIcon').value.trim()||'📚',tag=document.getElementById('catTag').value.trim()||title.slice(0,4).toUpperCase(),desc=getRichFieldValue('catDesc').trim()||'নতুন পরীক্ষা',grad=GRADIENTS[state.ui.pickedGradient].value;
+  const icon=document.getElementById('catIcon').value.trim()||'📚',tag=document.getElementById('catTag').value.trim()||title.slice(0,4).toUpperCase(),desc=getRichFieldValue('catDesc').trim()||'নতুন পরীক্ষা',grad=GRADIENTS[state.ui.pickedGradient].value,isActive=document.getElementById('catStudentVisible').checked;
   const contentTypes=getCheckedTypes('catContentTypes');
   if(!contentTypes.length)return toast('⚠️ কমপক্ষে ১টি টাইপ চেক করুন','error');
   if(state.ui.editingCategoryId){
     const ex=state.examTypes.find(e=>e.id===state.ui.editingCategoryId);
     if(!ex)return toast('পাওয়া যায়নি','error');
-    await putAll('categories',[{...ex,title,icon,tag,desc,grad,contentTypes,updatedAt:Date.now()}]);
+    await putAll('categories',[{...ex,title,icon,tag,desc,grad,contentTypes,isActive,updatedAt:Date.now()}]);
     state.ui.editingCategoryId=null;
-    ['catTitle','catIcon','catTag','catDesc'].forEach(id=>{const el=document.getElementById(id);if(el)el.value=''});clearRichField('catDesc');
+    ['catTitle','catIcon','catTag','catDesc'].forEach(id=>{const el=document.getElementById(id);if(el)el.value=''});clearRichField('catDesc');document.getElementById('catStudentVisible').checked=true;
     const btn=document.getElementById('catSaveBtn');if(btn)btn.textContent='➕ নতুন পরীক্ষা';
     const cb=document.getElementById('catCancelBtn');if(cb)cb.style.display='none';
     renderTypeCheckboxes('catContentTypes',getAllTypeKeys());
@@ -775,12 +781,12 @@ async function saveExamCategory(){
     toast(`✅ "${title}" আপডেট`,'success');return;
   }
   const id='exam_'+Date.now(),order=state.examTypes.length;
-  const items=[{id,type:'exam',title,icon,tag,desc,grad,order,contentTypes,createdAt:Date.now()}];
+  const items=[{id,type:'exam',title,icon,tag,desc,grad,order,contentTypes,isActive,createdAt:Date.now()}];
   ['বাংলা','ইংরেজি','গণিত','সাধারণ জ্ঞান'].forEach((name,i)=>{items.push({id:`sub_${id}_${i}`,type:'subject',examId:id,name,icon:SUBJECT_ICONS[name]||'📖',order:i})});
   await putAll('categories',items);await refreshState();fillAdminSelects();
   renderTypeCheckboxes('catContentTypes',getAllTypeKeys());
   toast(`✅ "${title}" + ৪টি বিষয়`,'success');
-  ['catTitle','catIcon','catTag','catDesc'].forEach(id=>{const el=document.getElementById(id);if(el)el.value=''});clearRichField('catDesc');
+  ['catTitle','catIcon','catTag','catDesc'].forEach(id=>{const el=document.getElementById(id);if(el)el.value=''});clearRichField('catDesc');document.getElementById('catStudentVisible').checked=true;
 }
 function editCategory(id){
   const c=state.examTypes.find(e=>e.id===id);if(!c)return;
@@ -788,7 +794,7 @@ function editCategory(id){
   document.getElementById('catTitle').value=c.title||'';
   document.getElementById('catIcon').value=c.icon||'';
   document.getElementById('catTag').value=c.tag||'';
-  setRichFieldValue('catDesc',c.desc||'');
+  setRichFieldValue('catDesc',c.desc||'');document.getElementById('catStudentVisible').checked=c.isActive!==false;
   const gi=GRADIENTS.findIndex(g=>g.value===c.grad);if(gi>=0){state.ui.pickedGradient=gi;renderGradientPicker()}
   renderTypeCheckboxes('catContentTypes',c.contentTypes||getAllTypeKeys());
   const btn=document.getElementById('catSaveBtn');if(btn)btn.textContent='✏️ আপডেট';
@@ -798,7 +804,7 @@ function editCategory(id){
 }
 function cancelEditCategory(){
   state.ui.editingCategoryId=null;
-  ['catTitle','catIcon','catTag','catDesc'].forEach(id=>{const el=document.getElementById(id);if(el)el.value=''});clearRichField('catDesc');
+  ['catTitle','catIcon','catTag','catDesc'].forEach(id=>{const el=document.getElementById(id);if(el)el.value=''});clearRichField('catDesc');document.getElementById('catStudentVisible').checked=true;
   renderTypeCheckboxes('catContentTypes',getAllTypeKeys());
   const btn=document.getElementById('catSaveBtn');if(btn)btn.textContent='➕ নতুন পরীক্ষা';
   const cb=document.getElementById('catCancelBtn');if(cb)cb.style.display='none';
