@@ -272,7 +272,7 @@ label{font-size:11px;font-weight:700;color:var(--muted);display:block;margin:10p
       <label>আইকন</label>
       <input id="subIcon" placeholder="🌍" maxlength="2" style="text-align:center;font-size:20px" />
       <label style="margin-top:6px">📋 Content Types (এই বিষয়ে কোন ধরনের কনটেন্ট)</label>
-      <p class="type-hint" id="subTypeHint">খালি রাখলে পরীক্ষার ডিফল্ট ব্যবহার হবে</p>
+      <p class="type-hint" id="subTypeHint">প্রতিটি বিষয়ের জন্য আলাদা করে ধরন টিক দিন — যেমন বাংলা: সিলেবাস+নোটস, ইংরেজি: সিলেবাস+ইন্টারভিউ।</p>
       <div class="type-actions">
         <button type="button" class="btn btn-sm btn-ghost" onclick="selectAllTypes('subContentTypes')">☑️ সব</button>
         <button type="button" class="btn btn-sm btn-ghost" onclick="clearAllTypes('subContentTypes')">☐ শূন্য</button>
@@ -599,7 +599,7 @@ function fillAdminSelects(){
   renderMcqList();renderExamList();renderContentList();renderAdminJobList();
   renderGradientPicker();renderJobColorPicker();renderCtColorPicker();renderCtList();
   if(!state.ui.editingCategoryId)renderTypeCheckboxes('catContentTypes',getAllTypeKeys());
-  if(!state.ui.editingSubjectId)renderTypeCheckboxes('subContentTypes',getAllTypeKeys());
+  if(!state.ui.editingSubjectId)setNewSubjectTypeDefaults();
 }
 function updateMcqSubjects(){const e=document.getElementById('mcqExam')?.value;const el=document.getElementById('mcqSubject');if(el)el.innerHTML=getSubjectsForExam(e).map(s=>`<option value="${esc(s.name)}">${esc(s.name)}</option>`).join('')||'<option value="">— বিষয় নেই —</option>';renderMcqList()}
 function updateCntSubjects(){const e=document.getElementById('cntExam')?.value;const el=document.getElementById('cntSubject');if(el)el.innerHTML=getSubjectsForExam(e).map(s=>`<option value="${esc(s.name)}">${esc(s.name)}</option>`).join('')||'<option value="">— বিষয় নেই —</option>';updateCntTypes()}
@@ -617,7 +617,8 @@ function updateCntTypes(){
   if(hint)hint.textContent=`✓ এই বিষয়ে ${allowed.length}টি টাইপ চালু আছে`;
   renderContentList();
 }
-function onSubMgrExamChange(){if(state.ui.editingSubjectId)cancelEditSubject();renderSubjectList()}
+function setNewSubjectTypeDefaults(){if(state.ui.editingSubjectId)return;const eid=document.getElementById('subMgrExam')?.value,exam=state.examTypes.find(e=>e.id===eid),types=exam?.contentTypes?.length?exam.contentTypes:getAllTypeKeys();renderTypeCheckboxes('subContentTypes',types)}
+function onSubMgrExamChange(){if(state.ui.editingSubjectId)cancelEditSubject();setNewSubjectTypeDefaults();renderSubjectList()}
 
 function renderEditBanners(){
   const bn=(id,name)=>{const el=document.getElementById(id);if(el)el.innerHTML=name?`<div class="edit-mode-banner">✏️ এডিট: <strong>${esc(name)}</strong></div>`:''};
@@ -750,7 +751,7 @@ async function deleteDc(id){await deleteFrom('dailyChallenges',id);if(state.ui.e
 async function saveDailyChallenge(){const date=document.getElementById('dcDate').value,mcqId=document.getElementById('dcMcq').value,bonus=Number(document.getElementById('dcBonus').value)||50;if(!date)return toast('তারিখ দিন','error');if(!mcqId)return toast('MCQ বাছুন','error');if(state.ui.editingDcId){const ex=state.dailyChallenges.find(c=>c.id===state.ui.editingDcId);if(!ex)return toast('পাওয়া যায়নি','error');await putAll('dailyChallenges',[{...ex,date,mcqId,bonus,updatedAt:Date.now()}]);state.ui.editingDcId=null;document.getElementById('dcDate').value=getTodayDate();document.getElementById('dcBonus').value=50;const btn=document.getElementById('dcSaveBtn');if(btn)btn.textContent='🎯 সেট';const cb=document.getElementById('dcCancelBtn');if(cb)cb.style.display='none';await refreshState();fillAdminSelects();toast('✅ আপডেট','success');return}const ex=state.dailyChallenges.find(c=>c.date===date);await putAll('dailyChallenges',[{id:ex?.id||'dc_'+Date.now(),date,mcqId,bonus,createdAt:Date.now()}]);await refreshState();fillAdminSelects();toast(`✅ সেট`,'success')}
 
 /* ===== CATEGORY ===== */
-async function toggleExamVisibility(id,isActive){const ex=state.examTypes.find(e=>e.id===id);if(!ex)return;await putAll('categories',[{...ex,isActive:!!isActive,updatedAt:Date.now()}]);await refreshState();fillAdminSelects();renderAdmin();toast(isActive?`✅ ${ex.title} Student অ্যাপে চালু`:`⏸️ ${ex.title} Student অ্যাপে লুকানো`,'success')}
+async function toggleExamVisibility(id,isActive){const ex=state.examTypes.find(e=>e.id===id);if(!ex)return;await putAll('categories',[{...ex,isActive:!!isActive,updatedAt:Date.now()}]);if(state.ui.editingCategoryId===id){const cb=document.getElementById('catStudentVisible');if(cb)cb.checked=!!isActive}await refreshState();fillAdminSelects();renderCategoryLists();toast(isActive?`✅ ${ex.title} Student অ্যাপে চালু`:`⏸️ ${ex.title} Student অ্যাপে লুকানো`,'success')}
 function renderCategoryLists(){
   const el=document.getElementById('catExamList');if(!el)return;
   document.getElementById('catCount').textContent=state.examTypes.length;
@@ -831,7 +832,7 @@ function renderSubjectList(){
   const exam=state.examTypes.find(x=>x.id===e);
   document.getElementById('subCount').textContent=subs.length;
   const hint=document.getElementById('subTypeHint');
-  if(hint)hint.textContent=`খালি রাখলে পরীক্ষার ${exam?.contentTypes?.length||state.contentTypes.length}টি টাইপ ব্যবহার হবে`;
+  if(hint)hint.textContent=`নতুন বিষয়ে পরীক্ষার ${exam?.contentTypes?.length||state.contentTypes.length}টি টাইপ আগে থেকেই নির্বাচিত থাকবে। বিষয়ভেদে বদলান; অন্তত ১টি রাখুন।`;
   const le=document.getElementById('catSubjectList');
   le.innerHTML=subs.length?subs.map(s=>{
     const effTypes=getContentTypesForSubject(s.examId,s.name);
