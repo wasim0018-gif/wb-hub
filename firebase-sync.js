@@ -1,25 +1,13 @@
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
-
-// ⬇️ Firebase Console → Project Settings → Your apps → Web → Config ⬇️
-const firebaseConfig = {
-  apiKey: "AIzaSyDAcZPfbf3StEVTfNmMwp_dYBHsw8WrijQ",
-  authDomain: "wb-exam-mock-hub-bf095.firebaseapp.com",
-  projectId: "wb-exam-mock-hub-bf095",
-  storageBucket: "wb-exam-mock-hub-bf095.firebasestorage.app",
-  messagingSenderId: "140842476702",
-  appId: "1:140842476702:web:e2c426aa90775dbfaec78f"
-};
-// ⬆️ উপরে আপনার তথ্য বসান ⬆️
-
-export const app = initializeApp(firebaseConfig);
-export const db = getFirestore(app);
-
+const API_ORIGIN = typeof window !== 'undefined' && typeof window.WB_EXAM_HUB_API_URL === 'string' ? window.WB_EXAM_HUB_API_URL.replace(/\/$/, '') : '';
+const API_PATH = `${API_ORIGIN}/api/content`;
+export const app = { name: 'wbexamhub-local-cloud' };
 export async function pullContent() {
-  const snap = await getDoc(doc(db, "appData", "content"));
-  return snap.exists() ? snap.data() : null;
+  const response = await fetch(`${API_PATH}?ts=${Date.now()}`, { cache: 'no-store', headers: { Accept: 'application/json' } });
+  if (!response.ok) throw new Error(`Sync pull failed: ${response.status}`);
+  return response.json();
 }
-
-export async function pushContent(data) {
-  await setDoc(doc(db, "appData", "content"), { ...data, updatedAt: Date.now() });
+export async function pushContent(snapshot) {
+  const response = await fetch(API_PATH, { method: 'PUT', cache: 'no-store', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(snapshot) });
+  if (!response.ok) throw new Error(`Sync push failed: ${response.status}`);
+  return response.json();
 }
