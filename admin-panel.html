@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!DOCTYPE htm>
 <html lang="bn">
 <head>
 <meta charset="UTF-8" />
@@ -17,7 +17,7 @@ body{min-height:100dvh;background:var(--bg);color:var(--text);font-family:'Hind 
 h1{font-size:24px;font-weight:800;margin:0}
 h2{font-size:20px;font-weight:700;margin:0 0 12px}
 h3{font-size:16px;font-weight:700;margin:0 0 8px}
-p{margin:0;line-height:1.5}
+p{margin:0;line-heig ht:1.5}
 .muted{color:var(--muted);font-size:13px}
 .admin-wrap{max-width:1400px;margin:0 auto;padding:20px}
 .admin-header{background:var(--card);border-radius:20px;padding:18px 22px;display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between;border:1px solid var(--border);box-shadow:0 4px 24px -8px rgba(15,23,42,.08);margin-bottom:20px}
@@ -452,7 +452,7 @@ async function exportSnapshot(){return{version:9,updatedAt:Date.now(),mcqs:await
 
 let state={mcqs:[],exams:[],contents:[],submissions:[],bookmarks:[],leaderboard:[],notifications:[],dailyChallenges:[],challengeCompletions:[],jobNotifications:[],results:[],examTypes:[],subjectList:[],contentTypes:[],ui:{pickedGradient:0,pickedJobColor:0,pickedCtColor:0,editingMcqId:null,editingExamId:null,editingContentId:null,editingCategoryId:null,editingSubjectId:null,editingJobId:null,editingNotifId:null,editingLbId:null,editingDcId:null,editingContentTypeId:null,editingResultId:null}};
 let _fbAuth=null,_fbPull=null,_fbPush=null,_fbSignIn=null,_fbSignOut=null,_fbOnStateChange=null;
-let _cloudSyncTimer=null,_cloudSyncBusy=false,_cloudSyncPending=false,_suppressCloudSync=0;
+let _cloudSyncTimer=null,_cloudSyncBusy=false,_cloudSyncPromise=null,_cloudSyncPending=false,_suppressCloudSync=0;
 
 async function initFirebase(){try{const sync=await import('./firebase-sync.js');_fbPull=sync.pullContent;_fbPush=sync.pushContent;_fbAuth={currentUser:{email:ADMIN_EMAIL}};_fbSignIn=async(auth,email)=>{auth.currentUser={email};return auth.currentUser};_fbSignOut=async(auth)=>{auth.currentUser=null};_fbOnStateChange=(auth,cb)=>cb(auth.currentUser);_fbOnStateChange(_fbAuth,handleAuthChange)}catch(e){console.error('Sync init failed:',e);document.getElementById('loginErr').textContent='❌ Sync service unavailable'}}
 async function handleAuthChange(user){if(user&&user.email===ADMIN_EMAIL){document.getElementById('loginScreen').style.display='none';document.getElementById('adminApp').style.display='block';document.getElementById('adminEmailDisplay').textContent=user.email;await loadAdminData()}else{document.getElementById('loginScreen').style.display='flex';document.getElementById('adminApp').style.display='none'}}
@@ -471,7 +471,28 @@ async function refreshState(){
   const[mcqs,exams,contents,submissions,bookmarks,leaderboard,notifications,dailyChallenges,challengeCompletions,jobNotifications,results]=await Promise.all([getAll('mcqs'),getAll('exams'),getAll('contents'),getAll('submissions'),getAll('bookmarks'),getAll('leaderboard'),getAll('notifications'),getAll('dailyChallenges'),getAll('challengeCompletions'),getAll('jobNotifications'),getAll('results')]);
   state.mcqs=mcqs;state.exams=exams;state.contents=contents;state.submissions=submissions;state.bookmarks=bookmarks;state.leaderboard=leaderboard;state.notifications=notifications.sort((a,b)=>(b.createdAt||0)-(a.createdAt||0));state.dailyChallenges=dailyChallenges;state.challengeCompletions=challengeCompletions;state.jobNotifications=jobNotifications.sort((a,b)=>(b.createdAt||0)-(a.createdAt||0));state.results=results.sort((a,b)=>(b.publishedAt||b.createdAt||0)-(a.publishedAt||a.createdAt||0));state.examTypes=cats.filter(c=>c.type==='exam').sort((a,b)=>(a.order||0)-(b.order||0));state.subjectList=cats.filter(c=>c.type==='subject').sort((a,b)=>(a.order||0)-(b.order||0))
 }
-async function pushToCloud(showToast=true){if(!_fbPush){if(showToast)toast('❌ Firebase নেই','error');return false}if(_cloudSyncBusy){_cloudSyncPending=true;return false}if(_cloudSyncTimer){clearTimeout(_cloudSyncTimer);_cloudSyncTimer=null}_cloudSyncPending=false;_cloudSyncBusy=true;try{if(showToast)toast('☁️ আপলোড হচ্ছে...');const data=await exportSnapshot();await _fbPush(data);await setMeta('lastSyncAt',Date.now());if(!_cloudSyncPending)await setMeta('cloudDirty',false);toast(showToast?'☁️ ক্লাউডে সফল!':'☁️ পরিবর্তন ক্লাউডে সেভ হয়েছে','success');return true}catch(e){console.error('Firebase push failed:',e);await setMeta('cloudDirty',true).catch(()=>{});toast('❌ ক্লাউডে সেভ ব্যর্থ—ইন্টারনেট/ Firebase পরীক্ষা করুন','error');return false}finally{_cloudSyncBusy=false;if(_cloudSyncPending&&!_cloudSyncTimer)_cloudSyncTimer=setTimeout(()=>{_cloudSyncTimer=null;runAutoCloudSync()},300)}}
+async function pushToCloud(showToast=true){
+  if(!_fbPush){if(showToast)toast('❌ Sync service নেই','error');return false}
+  // Save can overlap with the debounced automatic upload. Wait for that
+  // upload instead of incorrectly reporting a cloud-sync failure.
+  if(_cloudSyncBusy){_cloudSyncPending=true;return _cloudSyncPromise||false}
+  if(_cloudSyncTimer){clearTimeout(_cloudSyncTimer);_cloudSyncTimer=null}
+  _cloudSyncPending=false;_cloudSyncBusy=true;
+  const upload=(async()=>{try{
+    if(showToast)toast('☁️ আপলোড হচ্ছে...');
+    const data=await exportSnapshot();await _fbPush(data);
+    await setMeta('lastSyncAt',Date.now());
+    if(!_cloudSyncPending)await setMeta('cloudDirty',false);
+    toast(showToast?'☁️ ক্লাউডে সফল!':'☁️ পরিবর্তন ক্লাউডে সেভ হয়েছে','success');return true;
+  }catch(e){
+    console.error('Cloud push failed:',e);await setMeta('cloudDirty',true).catch(()=>{});
+    toast('❌ ক্লাউডে সেভ ব্যর্থ—ইন্টারনেট/সার্ভার পরীক্ষা করুন','error');return false;
+  }finally{
+    _cloudSyncBusy=false;_cloudSyncPromise=null;
+    if(_cloudSyncPending&&!_cloudSyncTimer)_cloudSyncTimer=setTimeout(()=>{_cloudSyncTimer=null;runAutoCloudSync()},300);
+  }})();
+  _cloudSyncPromise=upload;return upload;
+}
 async function pullFromCloud(){if(!_fbPull)return toast('❌ Firebase নেই','error');try{if(await getMeta('cloudDirty')){const ok=confirm('⚠️ লোকাল পরিবর্তন এখনো ক্লাউডে সেভ হয়নি। Pull করলে সেগুলো মুছে যেতে পারে। তবুও ক্লাউডের ডেটা আনবেন?');if(!ok)return}toast('🔄 নামানো হচ্ছে...');const remote=await _fbPull();if(!remote)return toast('❌ ক্লাউডে কিছু নেই','error');if(_cloudSyncTimer){clearTimeout(_cloudSyncTimer);_cloudSyncTimer=null}_cloudSyncPending=false;await bulkImport(remote);await setMeta('lastSyncAt',remote.updatedAt||Date.now());await setMeta('cloudDirty',false);await refreshState();fillAdminSelects();renderAdmin();toast('✅ ক্লাউড থেকে লোড','success')}catch(e){console.error('Firebase pull failed:',e);toast('❌ ক্লাউড থেকে নামানো ব্যর্থ','error')}}
 
 const toastEl=document.getElementById('toast');
