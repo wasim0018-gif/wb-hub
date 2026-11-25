@@ -3,7 +3,7 @@ import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/fireb
 
 // Keep this module beside the Admin HTML file and serve both over HTTPS.
 const firebaseConfig = {
-  apiKey: "AIzaSyDAZcPfbf3StEVTfNmMwp_dYBHsw8WrijQ",
+  apiKey: "AIzaSyDAcZPfbf3StEVTfNmMwp_dYBHsw8WrijQ",
   authDomain: "wb-exam-mock-hub-bf095.firebaseapp.com",
   projectId: "wb-exam-mock-hub-bf095",
   storageBucket: "wb-exam-mock-hub-bf095.firebasestorage.app",
