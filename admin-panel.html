@@ -110,6 +110,8 @@ label{font-size:11px;font-weight:700;color:var(--muted);display:block;margin:10p
     <input id="loginPassword" type="password" placeholder="••••••••" autocomplete="current-password" onkeydown="if(event.key==='Enter')adminLogin()" />
     <div id="loginErr" style="color:var(--danger);font-size:12px;font-weight:700;text-align:center;min-height:18px;margin:12px 0"></div>
     <button class="btn btn-primary" style="width:100%" onclick="adminLogin()">🔓 Login</button>
+    <button class="btn btn-ghost" id="forgotPasswordBtn" type="button" style="width:100%;margin-top:10px" onclick="sendAdminPasswordReset()">🔑 পাসওয়ার্ড ভুলে গেছেন?</button>
+    <p class="muted" style="text-align:center;font-size:11px;margin-top:8px">এই বাটনে চাপলে অনুমোদিত Admin Email-এ পাসওয়ার্ড পরিবর্তনের লিংক পাঠানো হবে।</p>
   </div>
 </div>
 
@@ -432,12 +434,44 @@ async function bulkImport(json){_suppressCloudSync++;try{const stores=['mcqs','e
 async function exportSnapshot(){return{version:9,updatedAt:Date.now(),mcqs:await getAll('mcqs'),scheduledExams:await getAll('exams'),contents:await getAll('contents'),submissions:await getAll('submissions'),categories:await getAll('categories'),bookmarks:await getAll('bookmarks'),leaderboard:await getAll('leaderboard'),notifications:await getAll('notifications'),dailyChallenges:await getAll('dailyChallenges'),challengeCompletions:await getAll('challengeCompletions'),jobNotifications:await getAll('jobNotifications'),contentTypes:await getAll('contentTypes')}}
 
 let state={mcqs:[],exams:[],contents:[],submissions:[],bookmarks:[],leaderboard:[],notifications:[],dailyChallenges:[],challengeCompletions:[],jobNotifications:[],examTypes:[],subjectList:[],contentTypes:[],ui:{pickedGradient:0,pickedJobColor:0,pickedCtColor:0,editingMcqId:null,editingExamId:null,editingContentId:null,editingCategoryId:null,editingSubjectId:null,editingJobId:null,editingNotifId:null,editingLbId:null,editingDcId:null,editingContentTypeId:null}};
-let _fbAuth=null,_fbPull=null,_fbPush=null,_fbSignIn=null,_fbSignOut=null,_fbOnStateChange=null;
+let _fbAuth=null,_fbPull=null,_fbPush=null,_fbSignIn=null,_fbSendPasswordReset=null,_fbSignOut=null,_fbOnStateChange=null;
 let _cloudSyncTimer=null,_cloudSyncBusy=false,_cloudSyncPending=false,_suppressCloudSync=0;
 
-async function initFirebase(){try{const sync=await import('./firebase-sync.js');const authMod=await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js");_fbAuth=authMod.getAuth(sync.app);_fbPull=sync.pullContent;_fbPush=sync.pushContent;_fbSignIn=authMod.signInWithEmailAndPassword;_fbSignOut=authMod.signOut;_fbOnStateChange=authMod.onAuthStateChanged;_fbOnStateChange(_fbAuth,handleAuthChange)}catch(e){console.error('Firebase init failed:',e);document.getElementById('loginErr').textContent='❌ Firebase কনফিগারেশন প্রয়োজন'}}
+async function initFirebase(){try{const sync=await import('./firebase-sync.js');const authMod=await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js");_fbAuth=authMod.getAuth(sync.app);_fbPull=sync.pullContent;_fbPush=sync.pushContent;_fbSignIn=authMod.signInWithEmailAndPassword;_fbSendPasswordReset=authMod.sendPasswordResetEmail;_fbSignOut=authMod.signOut;_fbOnStateChange=authMod.onAuthStateChanged;_fbOnStateChange(_fbAuth,handleAuthChange)}catch(e){console.error('Firebase init failed:',e);document.getElementById('loginErr').textContent='❌ Firebase কনফিগারেশন প্রয়োজন'}}
 async function handleAuthChange(user){if(user&&user.email===ADMIN_EMAIL){document.getElementById('loginScreen').style.display='none';document.getElementById('adminApp').style.display='block';document.getElementById('adminEmailDisplay').textContent=user.email;await loadAdminData()}else{document.getElementById('loginScreen').style.display='flex';document.getElementById('adminApp').style.display='none'}}
-async function adminLogin(){const email=document.getElementById('loginEmail').value.trim(),password=document.getElementById('loginPassword').value,err=document.getElementById('loginErr');err.textContent='';if(!email||!password){err.textContent='❌ ইমেইল ও পাসওয়ার্ড দিন';return}if(email.toLowerCase()!==ADMIN_EMAIL.toLowerCase()){err.textContent='❌ এই ইমেইল অনুমোদিত নয়';return}try{await _fbSignIn(_fbAuth,email,password);toast('✅ লগইন সফল','success')}catch(e){err.textContent='❌ ভুল ইমেইল বা পাসওয়ার্ড'}}
+async function adminLogin(){const email=document.getElementById('loginEmail').value.trim(),password=document.getElementById('loginPassword').value,err=document.getElementById('loginErr');err.textContent='';err.style.color='var(--danger)';if(!email||!password){err.textContent='❌ ইমেইল ও পাসওয়ার্ড দিন';return}if(email.toLowerCase()!==ADMIN_EMAIL.toLowerCase()){err.textContent='❌ এই ইমেইল অনুমোদিত নয়';return}try{await _fbSignIn(_fbAuth,email,password);toast('✅ লগইন সফল','success')}catch(e){err.textContent='❌ ভুল ইমেইল বা পাসওয়ার্ড'}}
+
+async function sendAdminPasswordReset(){
+  const err=document.getElementById('loginErr');
+  const btn=document.getElementById('forgotPasswordBtn');
+  err.textContent='';
+  err.style.color='var(--danger)';
+  if(!_fbAuth||!_fbSendPasswordReset){err.textContent='❌ Firebase চালু হয়নি। পেজটি রিফ্রেশ করে আবার চেষ্টা করুন।';return}
+  const enteredEmail=document.getElementById('loginEmail').value.trim();
+  if(enteredEmail&&enteredEmail.toLowerCase()!==ADMIN_EMAIL.toLowerCase()){
+    err.textContent='❌ অনুমোদিত Admin Email লিখুন: '+ADMIN_EMAIL;
+    return;
+  }
+  btn.disabled=true;
+  btn.textContent='⏳ পাঠানো হচ্ছে...';
+  try{
+    await _fbSendPasswordReset(_fbAuth,ADMIN_EMAIL);
+    err.style.color='var(--success)';
+    err.textContent='✅ '+ADMIN_EMAIL+' ঠিকানায় Password Reset Link পাঠানো হয়েছে। Gmail-এর Inbox ও Spam ফোল্ডার দেখুন।';
+    toast('📧 Reset Link পাঠানো হয়েছে','success');
+  }catch(e){
+    console.error('Password reset failed:',e);
+    err.style.color='var(--danger)';
+    if(e.code==='auth/too-many-requests') err.textContent='❌ অনেকবার চেষ্টা হয়েছে। কিছুক্ষণ পরে আবার চেষ্টা করুন।';
+    else if(e.code==='auth/network-request-failed') err.textContent='❌ ইন্টারনেট সংযোগ পরীক্ষা করে আবার চেষ্টা করুন।';
+    else if(e.code==='auth/operation-not-allowed') err.textContent='❌ Firebase Console-এ Email/Password Sign-in চালু করুন।';
+    else if(e.code==='auth/invalid-email') err.textContent='❌ Admin Email ঠিক নয়। Firebase সেটিংস পরীক্ষা করুন।';
+    else err.textContent='❌ Reset Link পাঠানো যায়নি। Firebase Authentication ও Email Template পরীক্ষা করুন।';
+  }finally{
+    btn.disabled=false;
+    btn.textContent='🔑 পাসওয়ার্ড ভুলে গেছেন?';
+  }
+}
 async function adminLogout(){if(!confirm('লগআউট করবেন?'))return;try{if(await getMeta('cloudDirty')){const ok=await pushToCloud();if(!ok){toast('❌ ক্লাউডে সেভ হয়নি—লগআউট বাতিল','error');return}}await _fbSignOut(_fbAuth);toast('🚪 লগআউট','success')}catch(e){console.error('Logout failed:',e);toast('❌ লগআউট ব্যর্থ','error')}}
 async function loadAdminData(){let dirty=false;try{dirty=!!(await getMeta('cloudDirty'))}catch(e){console.error('Dirty flag read failed:',e)}if(dirty){const ok=await pushToCloud(false);if(!ok)toast('⚠️ লোকাল পরিবর্তন রাখা হয়েছে; ক্লাউড সিঙ্ক ব্যর্থ','error')}else{try{if(_fbPull){const remote=await _fbPull();if(remote){await bulkImport(remote);await setMeta('lastSyncAt',remote.updatedAt||Date.now())}}}catch(e){console.error('Pull failed:',e)}}await refreshState();fillAdminSelects();renderAdmin()}
 
